@@ -1,0 +1,2 @@
+Frequency per sample and sampling depth information. The merged sequences with a shorter length than the threshold chosen to filter the non ribosomal sequences are included in the statistics.
+Download, drag and drop the file on `quiime2view <https://view.qiime2.org/>`_

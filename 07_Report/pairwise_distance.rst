@@ -1,0 +1,2 @@
+The pairwise-distances visualizer also assesses changes between paired samples from two different “states”, it operates on a distance matrix to assess the distance between “pre” and “post” sample pairs, and tests whether these paired differences are significantly different between different groups, as specified by the group-column parameter.
+Download, drag and drop the file on `quiime2view <https://view.qiime2.org/>`_

@@ -138,9 +138,9 @@ rule all:
     # q2_repseq_filtered = OUTPUTDIR + "/04_taxonomy/" + PROJ + "-rep-filtered-seqs-taxa-" + GROUP + ".qza",
     # table_tax = OUTPUTDIR + "/04_taxonomy/taxonomy.tsv",
     # table_tax_filtered = OUTPUTDIR + "/04_taxonomy/taxonomy_filtered.tsv",
-    stats_viz = OUTPUTDIR + "/03_" + GROUP + "/" + PROJ + "-dada2-stats.qzv",
-    rep_viz = OUTPUTDIR + "/04_taxonomy/" + PROJ + "-rep-filtered-seqs-taxa-" + GROUP + ".qzv",
-    featurestat = OUTPUTDIR + "/04_taxonomy/" + PROJ + "-taxa-table-filtered-" + GROUP + ".qzv",
+    # stats_viz = OUTPUTDIR + "/03_" + GROUP + "/" + PROJ + "-dada2-stats.qzv",
+    # rep_viz = OUTPUTDIR + "/04_taxonomy/" + PROJ + "-rep-filtered-seqs-taxa-" + GROUP + ".qzv",
+    # featurestat = OUTPUTDIR + "/04_taxonomy/" + PROJ + "-taxa-table-filtered-" + GROUP + ".qzv",
     # rarefactionfiltertable = OUTPUTDIR + "/04_taxonomy/" + PROJ + "-rarefaction-table-filtered-" + GROUP + ".qza",
     # relativefreqtable = OUTPUTDIR + "/04_taxonomy/" + PROJ + "-relative-frequency-" + GROUP + ".qza",
     # table_biom = OUTPUTDIR + "/04_taxonomy/feature-table.biom",
@@ -185,7 +185,7 @@ rule all:
     # ## PCOa with cinetic in the axis
     # pcooutput = expand(OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/{pcoa}-emperor-days.qzv", pcoa=PCOA),
     # # Differential abundance
-    # table_collapse = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-collapse-table-" + GROUP + ".qza",
+    table_collapse = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-collapse-table-" + GROUP + ".qza",
     # table_abond = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-" + GROUP + ".qza",
     ## To do if you want remove samples for the differential analyses (with ANCOM)
     # table_abond_selectedsample = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-selectedsample-" + GROUP + ".qza",

@@ -1,0 +1,3 @@
+Sample composition in the context of categorical metadata using PERMANOVA 
+Unweighted UniFrac distance (a qualitative measure of community dissimilarity that incorporates phylogenetic relationships between the features) is used to test whether distances between samples within a group are more similar to each other then they are to samples from the other groups. 
+Download, drag and drop the file on `quiime2view <https://view.qiime2.org/>`_

@@ -1,0 +1,3 @@
+Volatility-plot contains an interactive feature volatility plot. Features are viewable as “metrics” (plotted on the y-axis). Feature metadata (feature importances and descriptive statistics) are plotted as bar charts below the volatility plot.
+Accuracy-results display the predictive accuracy of the regression model. This is important to view, as important features are meaningless if the model is inaccurate.
+Download, drag and drop the file on `quiime2view <https://view.qiime2.org/>`_

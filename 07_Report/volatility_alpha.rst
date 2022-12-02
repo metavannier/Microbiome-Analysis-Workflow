@@ -1,0 +1,3 @@
+Volatility visualizer generates interactive line plots that allow us to assess how volatile a dependent variable is over a continuous, independent variable (e.g., time) in one or more groups.
+We are looking here the alpha diversity metrics (Shannon’s diversity index, Observed Features (ASVs), Faith’s phylogenetic diversity, Pielou’s evenness).
+Download, drag and drop the file on `quiime2view <https://view.qiime2.org/>`_

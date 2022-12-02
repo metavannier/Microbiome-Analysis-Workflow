@@ -1,0 +1,3 @@
+This method calculates a “microbial maturity” index from a regression model trained on feature data to predict a given continuous metadata column (“state_column”), e.g., to predict a subject’s age as a function of microbiota composition. 
+The model is trained on a subset of control group samples, then predicts the column value for all samples. This visualization computes maturity index z-scores (MAZ) to compare relative “maturity” between each group.
+Download, drag and drop the file on `quiime2view <https://view.qiime2.org/>`_

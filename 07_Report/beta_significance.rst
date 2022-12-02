@@ -1,0 +1,2 @@
+Compare the structure of the microbiome communities using beta diversity. Here we use PERMANOVA to test whether the metadata of interest is associated with significant differences in betadiversity distance.
+Download, drag and drop the file on `quiime2view <https://view.qiime2.org/>`_

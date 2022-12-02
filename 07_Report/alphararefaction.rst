@@ -1,0 +1,2 @@
+Alpha Rarefaction and Selecting a Rarefaction Depth.
+Rarefaction is a method for normalization via sub-sampling without replacement and is commonly used as a workaround for the issue of uneven sequencing depth.

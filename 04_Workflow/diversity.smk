@@ -1,4 +1,3 @@
-# If you want exclude some sample from the analyses :
 rule filter_taxa_table:
     input:
         filtertable = OUTPUTDIR + "/04_taxonomy/" + PROJ + "-taxa-table-filtered-" + GROUP + ".qza"
@@ -21,9 +20,7 @@ rule filter_taxa_table:
 
 rule alpha_rarefaction:
     input:
-        # If you want exclude some sample from the analyses :
         filtertable_selectedsample = OUTPUTDIR + "/06_diversity/" + PROJ + "-taxa-table-filtered-selectedsample-" + GROUP + ".qza",
-        # filtertable = OUTPUTDIR + "/04_taxonomy/" + PROJ + "-taxa-table-filtered-" + GROUP + ".qza",
         metadata = ROOTDIR + METADATA
     output:
         rarefaction = report(OUTPUTDIR + "/06_diversity/" + PROJ + "-alpha_rarefaction_curves.qzv", caption = ROOTDIR + "/07_Report/alphararefaction.rst", category="06 diversity/alphadiversity")

@@ -1,0 +1,3 @@
+PCoA-based analyses
+A volatility plot will let us look at patterns of variation along principle coordinate axes starting from the same point. This can be helpful since inter-individual variation can be large and this visualizations lets us focus instead on magnitude of change in each group and in each individual.We are looking here the alpha diversity metrics (Shannon’s diversity index, Observed Features (ASVs), Faith’s phylogenetic diversity, Pielou’s evenness).
+Download, drag and drop the file on `quiime2view <https://view.qiime2.org/>`_

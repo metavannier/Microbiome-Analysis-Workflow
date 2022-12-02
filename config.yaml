@@ -15,7 +15,7 @@ project:
     # See https://docs.qiime2.org/2021.2/tutorials/importing/ for more information
     format: "PairedEndFastqManifestPhred33V2"
     # Metadata file for diversity rule
-    metadata: "/sample-metadata_all.tsv"
+    metadata: "/sample-metadata.tsv"
     # File with sample to remove from the diversity analyses
     rmsample: "/sample-filtered.tsv"
 
@@ -87,9 +87,9 @@ phylogeny:
 # Diversity
 diversity:
     mindepth: 10
-    # Take the mean of merged sequence after denoising and filtering (used for the axis limit of the alpha rarefaction plot)
+    # Take the mean of merged sequence after denoising and filtering (04_taxonomy/taxa-table-filtered-dada2.qzv) (used for the axis limit of the alpha rarefaction plot)
     maxdepth: 64500
-    # See the alpha rarefaction visualization (when the alpha diversity stabilized) and the feature table summary (to see the nb of sample below the rarefaction depth)
+    # See the 06_diversity/alpha_rarefaction visualization (when the alpha diversity stabilized) and the feature table summary (to see the nb of sample below the rarefaction depth)
     samplingdepth: 7500
     pcoaaxes: "days_since_experiment_start"
 

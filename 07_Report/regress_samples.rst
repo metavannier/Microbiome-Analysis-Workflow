@@ -1,0 +1,3 @@
+Supervised learning regressors predict continuous metadata values of unlabeled samples by learning the composition of labeled training samples.
+Regression accuracy results are represented in the form of a scatter plot showing predicted vs. true values for each test sample, accompanied by a linear regression line fitted to the data with 95% confidence intervals (grey shading). The true 1:1 ratio between predicted and true values is represented by a dotted line for comparison. Below this, model accuracy is quantified in a table displaying mean square error and the R value, P value, standard error of the estimated gradient, slope, and intercept of the linear regression fit.
+Download, drag and drop the files on `quiime2view <https://view.qiime2.org/>`_

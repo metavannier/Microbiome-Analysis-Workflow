@@ -1,0 +1,1 @@
+Feature table with the ASV sequences, their count per samples and their taxonomic affiliation.

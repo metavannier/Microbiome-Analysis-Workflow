@@ -1,6 +1,7 @@
+A METTRE A JOUR
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4772710.svg)](https://doi.org/10.5281/zenodo.4772710)
 
-# Microbiome Analysis Workflow: Metabarcoding analysis
+# Microbiome Analysis Workflow
 
 ## Author
 
@@ -20,14 +21,14 @@ Each snakemake rules call a specific conda environment. In this way you can easi
 
 You can use this workflow by downloading and extracting the latest release. If you intend to modify and further extend this workflow or want to work under version control, you can fork this repository.
 
-We would be pleased if you use this workflow and participate in its improvement. If you use it in a paper, don't forget to give credits to the author by citing the URL of this repository and, if available, its [DOI](https://doi.org/10.5281/zenodo.4772710).
+We would be pleased if you use this workflow and participate in its improvement. If you use it in a paper, don't forget to give credits to the author by citing the URL of this repository and, if available, its [DOI](https://doi.org/to update).
 
 ### Step 2: Configure workflow
 
 Configure the workflow according to your needs via editing the files and repositories:
 - 00_RawData need the fastq file of each run to analyse
 - 01_Reference the [Marker gene reference databases](https://docs.qiime2.org/2021.4/data-resources/) and the [SEPP reference databases](https://github.com/smirarab/sepp-refs/) if you build the phylogenetic tree with SEPP.
-- [manifest.tsv](/manifest.tsv), [sample-metadata.tsv](/sample-metadata.tsv) and [conditions.tsv](/conditions.tsv) to indicate the samples, run, metadata and conditions for the analyse.
+- [manifest.tsv](/manifest.tsv), [sample-metadata.tsv](/sample-metadata.tsv) and [conditions.tsv](/conditions.tsv) ans [sample-filtered.tsv](/sample-filtered.tsv) to indicate the samples, run, metadata, conditions and sample to remove for the analyse.
 - [config.yaml](/config.yaml) indicating the parameters to use.
 - Comment the [Snakefile](/Snakefile) on the input line not expected for the pipeline. This depend of the denoising, phylogenetic methods used and if longitudinal analysis are possible (to be improved).
 
