@@ -1,0 +1,141 @@
+# path or URL to condition sheet (TSV format)
+condition: conditions.tsv
+
+project:
+    # Project name
+    name: "weaning"
+    # Fastq file suffix, following the read pair designation
+    suffix: "_001.fastq.gz"
+    # Read pair designations
+    r1_suf: "R1"
+    r2_suf: "R2"
+    # Type of data
+    type: "SampleData[PairedEndSequencesWithQuality]"
+    # Format for importing data with qiime2: manifest file (PairedEndFastqManifestPhred33V2 or PairedEndFastqManifestPhred64V2, etc.) or folder (CasavaOneEightSingleLanePerSampleDirFmt)
+    # See https://docs.qiime2.org/2021.2/tutorials/importing/ for more information
+    format: "PairedEndFastqManifestPhred33V2"
+    # Metadata file for diversity rule
+    metadata: "/sample-metadata_all.tsv"
+    # File with sample to remove from the diversity analyses
+    rmsample: "/sample-filtered.tsv"
+
+primer:
+    # primer for 16S “V3-V4” regions
+    primerF: CCTACGGGNGGCWGCAG
+    primerR: GACTACHVGGGTATCTAATCC
+    # Parada et al. 2016 MEP primers for 16S
+    primer_err: 0.1
+    primer_overlap: 3
+
+grouping_method:
+    # Must be : "otu", "deblur" or "dada2"
+    ## ONLY dada2 is supported in this version ##
+    group: "dada2"
+
+merge:
+    # Merging reads for 16S
+    minoverlap: 20
+    maxdiff: 10
+    minlength: 400
+
+## OTU clustering
+quality-filter:
+# Quality filtering of merged reads
+    minphred: 4
+    qualwindow: 3
+
+cluster-denovo:
+# De novo OTU clustering
+    denovo_perc_id: 0.97
+    denovo_otu-thread: 1
+
+# Deblur
+deblur:
+    # setting this value to a length where the median quality score begins to drop too low (to applied when single-reads)
+    trim-length: 400
+
+# Dada2
+dada2:
+    truncation_err: 2
+    truncation_len-f: 229
+    truncation_len-r: 229
+    trim-left-f: 0
+    trim-left-r: 0
+    quality_err-f: 2
+    quality_err-r: 2
+    seqlenth: 400 # IMPORTANT parameter corresponding to the minimum length of merged reads to keep
+    training: 1000000 # should be set higher for a non-test dataset: default: 1000000
+    chimera: pooled
+    threads: 12 # if 0 all available cores will be used
+
+# Taxonomy
+taxonomy:
+    database_classified: "silva-138-99-nb-classifier.qza"
+    confidence: 0.7
+    njobs: 4 # Be carefull with the memory usage
+    filter: "d__Eukaryota"
+
+# Phylogeny
+phylogeny:
+    # method to use to construct the tree (MUST BE fasttree or sepp)
+    method: "sepp"
+    # SEPP reference database
+    seppdb: "sepp-refs-silva-128.qza"
+    # thread
+    sepp_thread: 10
+
+# Diversity
+diversity:
+    mindepth: 10
+    # Take the mean of merged sequence after denoising and filtering (used for the axis limit of the alpha rarefaction plot)
+    maxdepth: 64500
+    # See the alpha rarefaction visualization (when the alpha diversity stabilized) and the feature table summary (to see the nb of sample below the rarefaction depth)
+    samplingdepth: 7500
+    pcoaaxes: "days_since_experiment_start"
+
+# Differential abundance
+ancom:
+    taxa_level: 7
+    min_frequency: 50
+    min_sample: 4
+    # Column containing the 2 groups to compare. Can be a list containing more than 1 column
+    metadata_column: "PP_villi_vs_other,PP_vs_other"
+
+volatility:
+    # State for the pairwise difference
+    state1: 16
+    state2: 49
+    # Feature for the pairwise comparison (one or more with comma separated)
+    feature: "96f1df5356b17e2d4b6eefc878357fcb"
+    # Continuous, independent variable for the volatility visualizer
+    state_column: "days_since_experiment_start"
+    # Column with id to be represented
+    id_column: "Name-experiment"
+    # Group column to be represented by default
+    default_group_column: "PP_villi_vs_other"
+    # Alpha diversity metrics
+    alpha_diversity: "shannon,observed_features,evenness,faith_pd"
+    # Beta diversity metrics
+    beta_diversity: "jaccard,bray_curtis,unweighted_unifrac,weighted_unifrac"
+    # PCOA
+    pcoa: "bray_curtis,jaccard,unweighted_unifrac,weighted_unifrac"
+    ## Feature volatility
+    # Number of trees to grow for estimation.
+    n_estimators: 1000
+    # Estimator method to use for sample prediction ('RandomForestRegressor', 'ExtraTreesRegressor', 'GradientBoostingRegressor', 'AdaBoostRegressor', 'ElasticNet', 'Ridge', 'Lasso', 'KNeighborsRegressor', 'LinearSVR', 'SVR')
+    p_estimator: "RandomForestRegressor"
+    # Seed used by random number generator
+    random_state: 123
+    # Number of jobs to run in parallel
+    n_jobs: 10
+    # Column to show for the heatmap of best features
+    features_column: "Body-site,Age-days"
+    # Number of feature to show in the heatmap
+    feature_count: 30
+    # Control group for the maturity index (MAZ)
+    control: "PP_villi"
+    # Test size for the MAZ
+    test_size: 0.4
+
+
+

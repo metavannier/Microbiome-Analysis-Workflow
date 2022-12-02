@@ -1,0 +1,195 @@
+$schema: "http://json-schema.org/draft-06/schema#"
+
+description: snakemake configuration file
+
+type: object
+
+properties:
+  project:
+    type: object
+    properties:
+      name:
+        type: string
+      suffix:
+        type: string
+      r1_suf:
+        type: string
+      r2_suf:
+        type: string
+      type:
+        type: string
+      format:
+        type: string
+    required:
+      - name
+      - suffix
+      - r1_suf
+      - r2_suf
+      - format
+    
+  primer:
+    type: object
+    properties:
+      primerF:
+        type: string
+      primerR:
+        type: string
+      primer_err:
+        type: number
+      primer_overlap:
+        type: integer
+    required:
+      - primerF
+      - primerR
+      - primer_err
+      - primer_overlap
+
+  grouping_method:
+    type: object
+    properties:
+      group:
+        type: string
+    required:
+      - group
+
+  merge:
+    type: object
+    properties:
+      minoverlap:
+        type: integer
+      maxdiff:
+        type: integer
+      minlength:
+        type: integer
+      maxlength:
+        type: integer
+    required:
+      - minoverlap
+      - maxdiff
+      - minlength
+
+  quality-filter:
+    type: object
+    properties:
+      minphred:
+        type: integer
+      qualwindow:
+        type: integer
+    required:
+      - minphred
+      - qualwindow
+
+  cluster-denovo:
+    type: object
+    properties:
+      denovo_perc_id:
+        type: number
+      denovo_otu-thread:
+        type: integer
+    required:
+      - denovo_perc_id
+      - denovo_otu-thread
+
+  deblur:
+    type: object
+    properties:
+      trim-length:
+        type: integer
+    required:
+      - trim-length
+
+  dada2:
+    type: object
+    properties:
+      truncation_err:
+        type: integer
+      truncation_len-f:
+        type: integer
+      truncation_len-r:
+        type: integer
+      trim-left-f:
+        type: integer
+      trim-left-r:
+        type: integer
+      quality_err-f:
+        type: integer
+      quality_err-r:
+        type: integer
+      training: #should be set higher for a non-test dataset: put 1000000
+        type: integer
+      chimera:
+        type: string
+      threads: # all available cores will be used
+        type: integer
+      seqlenth:
+        type: integer
+    required:
+        - truncation_err
+        - truncation_len-f
+        - truncation_len-r
+        - trim-left-f
+        - trim-left-r
+        - quality_err-f
+        - quality_err-r
+        - training
+        - chimera
+        - threads
+        - seqlenth
+
+  taxonomy:
+    type: object
+    properties:
+      database_classified:
+        type: string
+      confidence:
+        type: number
+      njobs:
+        type: integer
+    required:
+      - database_classified
+      - confidence
+      - njobs
+
+  phylogeny:
+    type: object
+    properties:
+      method:
+        type: string
+      seppdb:
+        type: string
+      sepp_thread:
+        type: integer
+    required:
+      - method
+
+  diversity:
+    type: object
+    properties:
+      mindepth:
+        type: integer
+      maxdepth:
+        type: integer
+      samplingdepth:
+        type: integer
+      pcoaaxes:
+        type: string
+    required:
+      - mindepth
+      - maxdepth
+      - samplingdepth
+
+  ancom:
+    type: object
+    properties:
+      taxa_level:
+        type: integer
+      min_frequency:
+        type: integer
+      min_sample:
+        type: integer
+      metadata_column:
+        type: string
+    required:
+      - min_frequency
+      - min_sample
+      - metadata_column

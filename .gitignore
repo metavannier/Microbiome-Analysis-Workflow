@@ -1,0 +1,10 @@
+.snakemake/
+01_Reference
+05_Output
+08_Log
+allfastq
+00_RowData
+undernutrition_files/
+weaning_files/
+microdissection_files/
+report.html

@@ -1,0 +1,14 @@
+name: add_R_env
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+  - r
+  - rujinlong
+dependencies:
+  - r-base=4.0
+  - r-qiime2r=0.99.20
+  - r-mass =7.3-53
+  - bioconductor-edger =3.30.0
+  - r-readr
+  - r-dplyr
