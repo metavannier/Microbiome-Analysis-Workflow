@@ -7,6 +7,10 @@ min_version("5.1.2")
 configfile: "config.yaml"
 validate(config, schema="06_Schemas/config.schema.yaml")
 
+## Get the different group for the feature filtering by abundance
+group = pd.read_table(config["group"]).set_index(["group"], drop=False)
+GROUPCONDITION = expand("{group.group}", group=group.itertuples())
+
 ## Get the column name of the metadata file
 condition = pd.read_table(config["condition"]).set_index(["condition"], drop=False)
 CONDITION = expand("{condition.condition}", condition=condition.itertuples())
@@ -185,8 +189,18 @@ rule all:
     # ## PCOa with cinetic in the axis
     # pcooutput = expand(OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/{pcoa}-emperor-days.qzv", pcoa=PCOA),
     # # Differential abundance
-    table_collapse = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-collapse-table-" + GROUP + ".qza",
+    # table_collapse = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-collapse-table-" + GROUP + ".qza",
+    table_collapse_viz = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-collapse-table-" + GROUP + ".qzv",
     # table_abond = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-" + GROUP + ".qza",
+    # output_table_split = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_split-" + GROUP + ".txt",
+    # output_table_filtered = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_filtered-" + GROUP + ".txt",
+    # output_table_viz = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-visualization_feature_table-" + GROUP + ".txt",
+    # table_merged = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_merged-" + GROUP + ".txt",
+    # output_visualization_feature_table = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_merged-" + GROUP + ".qzv",
+    # merge_feature_table = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-merge_feature_table-" + GROUP + ".qza",
+    # visualization_merge_feature_table = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-merge_feature_table-" + GROUP + ".qzv",
+    # table_filter_feature = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_filter_feature-" + GROUP + ".qza",
+    # table_filter_feature_viz = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_filter_feature-" + GROUP + ".qzv",
     ## To do if you want remove samples for the differential analyses (with ANCOM)
     # table_abond_selectedsample = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-selectedsample-" + GROUP + ".qza",
     # table_abond_qzv = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-selectedsample-" + GROUP + ".qzv",

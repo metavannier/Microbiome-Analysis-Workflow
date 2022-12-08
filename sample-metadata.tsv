@@ -1,4 +1,4 @@
-sample-id	Name-sample	Name-experiment	Age-days	Body-site	days_since_experiment_start	PP_villi_vs_other	PP_vs_other	Group
+sample-id	Name-sample	Name-experiment	Age-days	Body-site	days_since_experiment_start	PP_villi_vs_other	PP_vs_other	group_experiment
 M5169	PEYERMICE16D-PP1	PEYERMICE-PP1	D16	Peyer's patch	16	PP_villi	PP	16_PP_villi
 M5637	PEYERMICE16D-PP2	PEYERMICE-PP2	D16	Peyer's patch	16	PP_villi	PP	16_PP_villi
 M5657	PEYERMICE16D-PP3	PEYERMICE-PP3	D16	Peyer's patch	16	PP_villi	PP	16_PP_villi

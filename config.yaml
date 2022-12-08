@@ -1,5 +1,6 @@
 # path or URL to condition sheet (TSV format)
 condition: conditions.tsv
+group: group.tsv
 
 project:
     # Project name
@@ -97,9 +98,9 @@ diversity:
 ancom:
     taxa_level: 7
     min_frequency: 50
-    min_sample: 4
+    min_sample: 2
     # Column containing the 2 groups to compare. Can be a list containing more than 1 column
-    metadata_column: "PP_villi_vs_other,PP_vs_other"
+    metadata_column: "group_experiment"
 
 volatility:
     # State for the pairwise difference

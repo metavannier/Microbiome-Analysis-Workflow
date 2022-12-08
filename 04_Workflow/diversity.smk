@@ -40,9 +40,7 @@ rule alpha_rarefaction:
 
 rule diversity_metrics:
     input:
-    # If you want exclude some sample from the analyses :
         filtertable = OUTPUTDIR + "/06_diversity/" + PROJ + "-taxa-table-filtered-selectedsample-" + GROUP + ".qza",
-        #filtertable = OUTPUTDIR + "/04_taxonomy/" + PROJ + "-taxa-table-filtered-" + GROUP + ".qza",
         tree = OUTPUTDIR + "/05_phylogeny/" + PROJ + "-rooted-tree.qza",
     output:
         d1 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/rarefied_table.qza",

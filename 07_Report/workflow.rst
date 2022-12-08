@@ -92,6 +92,8 @@ Grouping similar sequences (OTU, ASVs or sub-OTUs)
 Taxonomic table and visualization
 ---------------------------------
 
+=> Two samples are removed from the taxonomy and diversity analysis due to theyr low depth of sequencing (<7500) : M6946 and M6938
+
 - Frequency per sample and sampling depth information are in `/04 taxonomy/weaning-taxa-table-filtered-dada2.qzv </media/thomas/data/ciml_tomas_metab_weaning_180521/05_Output/04_taxonomy/weaning-taxa-table-filtered-dada2.qzv>`_ .
 
 - The table of the taxonomic assignation for each feature (OTU or ASV) are in `/04 taxonomy/taxonomy_filtered.tsv </media/thomas/data/ciml_tomas_metab_weaning_180521/05_Output/04_taxonomy/taxonomy_filtered.tsv>`_ .
@@ -106,8 +108,6 @@ Alpha Diversity Analysis
 - Alpha Rarefaction for the selection of the rarefaction depth
 
 `/06 diversity/alphadiversity/weaning-alpha_rarefaction_curves.qzv </media/thomas/data/ciml_tomas_metab_weaning_180521/05_Output/06_diversity/weaning-alpha_rarefaction_curves.qzv>`_
-
-=> Two samples are removed from the diversity analysis due to theyr low depth of sequencing (<7500) : M6950 and M6938
 
 - Files for visually and statistically compare groups of alpha diversity values calculated with different metrics.
 
