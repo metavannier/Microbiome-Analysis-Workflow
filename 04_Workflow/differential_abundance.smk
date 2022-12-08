@@ -91,32 +91,6 @@ rule filter_features:
         echo "filter_group DONE" > {output.output_table_filtered}
         """
 
-rule visualization_feature_table:
-    input:
-        table_filtered = expand(OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_filtered-{group}-" + GROUP + ".qza", group=GROUPCONDITION),
-    output:
-        output_table_viz = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-visualization_feature_table-" + GROUP + ".txt"
-    params:
-        group = GROUPCONDITION,
-        table_filtered_viz = expand(OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_filtered-{group}-" + GROUP + ".qzv", group=GROUPCONDITION),
-        metadata = ROOTDIR + METADATA
-    conda:
-        ROOTDIR + "/02_Container/qiime2.yaml"
-    shell:
-        """
-        table_filtered=({input.table_filtered})
-        table_filtered_viz=({params.table_filtered_viz})
-        group=({params.group})
-        len=${{#group[@]}}
-        for (( i=0; i<$len; i=i+1 ))
-        do qiime feature-table summarize \
-        --i-table ${{table_filtered[$i]}} \
-        --o-visualization ${{table_filtered_viz[$i]}} \
-        --verbose
-        done
-        qiime tools inspect-metadata {params.metadata} >> {output.output_table_viz}
-        """
-
 ## Merge the feature table which has been filtered independantly
 ## LA voir comment mettre la list en shell
 rule merge_feature_table:
@@ -139,13 +113,6 @@ rule merge_feature_table:
         --o-merged-table ${{table_merged}}
         echo ${{list_table_filtered}} >> {output.output_table_merged}
         """
-        # list_table_filtered+=( ${{table_filtered[0]}} )
-        # list_table_filtered+=( ${{table_filtered[1]}} )
-        # list_table_filtered+=( ${{table_filtered[2]}} )
-        # list_table_filtered+=( ${{table_filtered[3]}} )
-        # list_table_filtered+=( ${{table_filtered[4]}} )
-        # --p-overlap-method error_on_overlapping_feature \
-
 
 rule visualization_merge_feature_table:
     input:
@@ -161,89 +128,25 @@ rule visualization_merge_feature_table:
         --o-visualization {output.output_visualization_feature_table}
         """
 
-## Get the original value of the filtered feature
-# rule filtered_feature_table:
-#     input:
-#         table_merged = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_merged-" + GROUP + ".qza",
-#         table_collapse = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-collapse-table-" + GROUP + ".qza",
-#     output:
-#         merge_feature_table = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-merge_feature_table-" + GROUP + ".qza",
-#     conda:
-#         ROOTDIR + "/02_Container/qiime2.yaml"
-#     shell:
-#         """
-#         qiime feature-table merge \
-#         --i-tables {input.table_merged} {input.table_collapse} \
-#         --o-merged-table {output.merge_feature_table} \
-#         --p-overlap-method sum
-#         """
-
-# rule visualization_filtered_feature_table:
-#     input:
-#         merge_feature_table = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-merge_feature_table-" + GROUP + ".qza",
-#     output:
-#         visualization_merge_feature_table = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-merge_feature_table-" + GROUP + ".qzv"
-#     conda:
-#         ROOTDIR + "/02_Container/qiime2.yaml"
-#     shell:
-#         """
-#         qiime metadata tabulate \
-#         --m-input-file {input.merge_feature_table} \
-#         --o-visualization {output.visualization_merge_feature_table}
-        # """
-
-## La voir, comment obtenir le tableau -collapse-table- sans les taxon éliminé par le filtre "
-rule table_filter_feature:
+rule filter_sample:
     input:
-        table_collapse = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-collapse-table-" + GROUP + ".qza",
-        # table_merged = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_merged-" + GROUP + ".qza",
-        sklearn = OUTPUTDIR + "/04_taxonomy/" + PROJ + "-tax_sklearn.qza",
+        table_merged = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_merged-" + GROUP + ".qza",
     output:
-        table_filter_feature = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_filter_feature-" + GROUP + ".qza",
+        table_abond_selectedsample = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-selectedsample-" + GROUP + ".qza",
+        table_abond_qzv = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-selectedsample-" + GROUP + ".qzv"
+    params:
+        metadata = ROOTDIR + RMSAMPLE
     conda:
         ROOTDIR + "/02_Container/qiime2.yaml"
     shell:
         """
-        qiime taxa filter-table \
-        --i-table {input.table_collapse} \
-        --i-taxonomy {input.sklearn} \
-        --o-filtered-table {output.table_filter_feature} \
-        --p-include "Unassigned;__;__;__;__;__;__"
+        qiime feature-table filter-samples \
+        --i-table {input.table_merged} \
+        --m-metadata-file {params.metadata}\
+        --p-exclude-ids True \
+        --o-filtered-table {output.table_abond_selectedsample}
+        qiime metadata tabulate --m-input-file {output.table_abond_selectedsample} --o-visualization {output.table_abond_qzv}
         """
-
-# rule visualization_table_filter_feature:
-#     input:
-#         table_filter_feature = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_filter_feature-" + GROUP + ".qza",
-#     output:
-#         table_filter_feature_viz = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_filter_feature-" + GROUP + ".qzv"
-#     conda:
-#         ROOTDIR + "/02_Container/qiime2.yaml"
-#     shell:
-#         """
-#         qiime metadata tabulate \
-#         --m-input-file {input.table_filter_feature}  \
-#         --o-visualization {output.table_filter_feature_viz}
-#         """
-
-# rule filter_sample:
-#     input:
-#         table_merged = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_merged-" + GROUP + ".qza",
-#     output:
-#         table_abond_selectedsample = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-selectedsample-" + GROUP + ".qza",
-#         table_abond_qzv = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-selectedsample-" + GROUP + ".qzv"
-#     params:
-#         metadata = ROOTDIR + RMSAMPLE
-#     conda:
-#         ROOTDIR + "/02_Container/qiime2.yaml"
-#     shell:
-#         """
-#         qiime feature-table filter-samples \
-#         --i-table {input.table_merged} \
-#         --m-metadata-file {params.metadata}\
-#         --p-exclude-ids True \
-#         --o-filtered-table {output.table_abond_selectedsample}
-#         qiime metadata tabulate --m-input-file {output.table_abond_selectedsample} --o-visualization {output.table_abond_qzv}
-#         """
 
 ############################
 
