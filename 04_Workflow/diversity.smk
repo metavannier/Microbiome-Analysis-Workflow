@@ -13,7 +13,8 @@ rule filter_taxa_table:
         qiime feature-table filter-samples \
         --i-table {input.filtertable} \
         --m-metadata-file {params.metadata}\
-        --p-exclude-ids True \
+        --p-no-exclude-ids FALSE \
+        --p-filter-empty-features TRUE \
         --o-filtered-table {output.filtertable_selectedsample}        
         qiime metadata tabulate --m-input-file {output.filtertable_selectedsample} --o-visualization {output.table_count_qzv}
         """
