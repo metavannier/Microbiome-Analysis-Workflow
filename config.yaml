@@ -91,7 +91,7 @@ diversity:
     # Take the mean of merged sequence after denoising and filtering (04_taxonomy/taxa-table-filtered-dada2.qzv) (used for the axis limit of the alpha rarefaction plot)
     maxdepth: 64500
     # See the 06_diversity/alpha_rarefaction visualization (when the alpha diversity stabilized) and the feature table summary (to see the nb of sample below the rarefaction depth)
-    samplingdepth: 15000
+    samplingdepth: 7500
     pcoaaxes: "days_since_experiment_start"
 
 # Differential abundance
@@ -113,7 +113,7 @@ volatility:
     # Column with id to be represented
     id_column: "Name-experiment"
     # Group column to be represented by default
-    default_group_column: "PP_villi_vs_other"
+    default_group_column: "group_experiment"
     # Alpha diversity metrics
     alpha_diversity: "shannon,observed_features,evenness,faith_pd"
     # Beta diversity metrics
@@ -134,7 +134,7 @@ volatility:
     # Number of feature to show in the heatmap
     feature_count: 30
     # Control group for the maturity index (MAZ)
-    control: "PP_villi"
+    control: "16_PP"
     # Test size for the MAZ
     test_size: 0.4
 

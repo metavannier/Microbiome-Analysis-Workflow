@@ -132,20 +132,41 @@ rule filter_sample:
         table_merged = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_merged-" + GROUP + ".qza",
     output:
         table_abond_selectedsample = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-selectedsample-" + GROUP + ".qza",
-        table_abond_qzv = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-selectedsample-" + GROUP + ".qzv"
+        table_abond_qzv = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-selectedsample-" + GROUP + ".qzv",
+        table_abond_tsv = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-selectedsample-" + GROUP + ".tsv",
     params:
-        metadata = ROOTDIR + RMSAMPLE
+        metadata = ROOTDIR + RMSAMPLE,
+        path_biom = OUTPUTDIR + "/07_differential_abundance/",
+        table_biom = OUTPUTDIR + "/07_differential_abundance/feature-table.biom",
     conda:
         ROOTDIR + "/02_Container/qiime2.yaml"
     shell:
         """
         qiime feature-table filter-samples \
         --i-table {input.table_merged} \
-        --m-metadata-file {params.metadata}\
-        --p-exclude-ids True \
+        --m-metadata-file {params.metadata} \
+        --p-no-exclude-ids FALSE \
+        --p-filter-empty-features FALSE \
         --o-filtered-table {output.table_abond_selectedsample}
         qiime metadata tabulate --m-input-file {output.table_abond_selectedsample} --o-visualization {output.table_abond_qzv}
+        qiime tools export --input-path {output.table_abond_selectedsample} --output-path {params.path_biom}
+        biom convert -i {params.table_biom} -o {output.table_abond_tsv} --to-tsv --header-key taxonomy
         """
+
+# Formating table abundance of the taxon for LEfse
+rule lefse:
+    input:
+        table_abond_tsv = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-selectedsample-" + GROUP + ".tsv",
+    output:
+        table_abond_lefse = report(OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_abond_lefse.tsv", caption = ROOTDIR + "/07_Report/lefse.rst", category="07 differential abundance"),
+    params:
+        metadata = ROOTDIR + RMSAMPLE,
+    conda:
+        ROOTDIR + "/02_Container/lefse.yaml"
+    message:
+        "Run formating table abundance of the taxon for LEfse"
+    script:
+        SCRIPTSDIR + "/lefse.R"
 
 ############################
 
@@ -165,7 +186,6 @@ rule pseudocount:
         --o-composition-table {output.table_abond_comp}
         """
 
-## LA FAIRE LES GROUPES POUR COMPARAISON DEUX A DEUX (demander à Julie)
 rule ancom:
     input:
         table_abond_comp = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-comp-" + GROUP + ".qza"

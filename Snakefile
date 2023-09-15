@@ -189,15 +189,17 @@ rule all:
     # ## PCOa with cinetic in the axis
     # pcooutput = expand(OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/{pcoa}-emperor-days.qzv", pcoa=PCOA),
     # # Differential abundance
-    table_collapse = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-collapse-table-" + GROUP + ".qza",
-    table_collapse_viz = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-collapse-table-" + GROUP + ".qzv",
-    output_table_split = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_split-" + GROUP + ".txt",
-    output_table_filtered = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_filtered-" + GROUP + ".txt",
-    output_table_merged = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_merged-" + GROUP + ".txt",
-    output_visualization_feature_table = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_merged-" + GROUP + ".qzv",
-    ## To do if you want remove samples for the differential analyses (with ANCOM)
+    # table_collapse = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-collapse-table-" + GROUP + ".qza",
+    # table_collapse_viz = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-collapse-table-" + GROUP + ".qzv",
+    # output_table_split = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_split-" + GROUP + ".txt",
+    # output_table_filtered = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_filtered-" + GROUP + ".txt",
+    # output_table_merged = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_merged-" + GROUP + ".txt",
+    # output_visualization_feature_table = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_merged-" + GROUP + ".qzv",
+    # # ## To do if you want remove samples for the differential analyses (with ANCOM)
     # table_abond_selectedsample = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-selectedsample-" + GROUP + ".qza",
     # table_abond_qzv = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-selectedsample-" + GROUP + ".qzv",
+    # table_abond_tsv = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-selectedsample-" + GROUP + ".tsv",
+    table_abond_lefse = report(OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_abond_lefse.tsv", caption = ROOTDIR + "/07_Report/lefse.rst", category="07 differential abundance"),
     # table_abond_comp = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-comp-" + GROUP + ".qza",
     # ancom = expand(OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-ancom-{column}-" + GROUP + ".qzv", column=COLUMN),
     # #### Longitudinal analysis (NEED numerical data)
@@ -260,6 +262,6 @@ report: "07_Report/workflow.rst"
 # include: "04_Workflow/" + GROUP + ".smk"
 # include: "04_Workflow/taxonomy.smk"
 # include: "04_Workflow/phylogeny_" + PHYLO + ".smk"
-# include: "04_Workflow/diversity.smk"
+include: "04_Workflow/diversity.smk"
 include: "04_Workflow/differential_abundance.smk"
 include: "04_Workflow/longitudinal_analysis.smk"
