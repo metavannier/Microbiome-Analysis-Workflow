@@ -16,7 +16,6 @@ table_abond_lefse=snakemake@output[["table_abond_lefse"]]
 # Relative abudance table to transform as LEfSe format
 table_abond_tsv <- read.table(snakemake@input[["table_abond_tsv"]], header=FALSE, sep = "\t")
 
-table_abond_tsv[,1] <- gsub(';','|',table_abond_tsv[,1])
 table_abond_tsv[,1] <- gsub('\"','',table_abond_tsv[,1])
 
 # Add marker column
@@ -36,7 +35,8 @@ group_experiment <- append("day", group_experiment)
 
 # ADD the index and day row to the original abundance datatable
 index_day <- rbind(table_abond_colname[1,],group_experiment)
-table_abond_test <- rbind(index_day,table_abond_colname)
-table_abond_test <- table_abond_test[-3,]
+table_abond_lefse_final <- rbind(index_day,table_abond_colname)
+table_abond_lefse_final <- table_abond_lefse_final[-3,]
+table_abond_lefse_final[,1] <- gsub(';','|',table_abond_lefse_final[,1])
 
-write.table(table_abond_test, file = table_abond_lefse, sep="\t", quote = FALSE,row.names = FALSE, col.names = FALSE)
+write.table(table_abond_lefse_final, file = table_abond_lefse, sep="\t", quote = FALSE,row.names = FALSE, col.names = FALSE)

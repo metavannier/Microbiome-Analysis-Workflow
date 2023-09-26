@@ -31,7 +31,6 @@ R2_SUF = str(config["project"]["r2_suf"])
 METADATA = config["project"]["metadata"]
 RMSAMPLE = config["project"]["rmsample"]
 
-
 # Use glob statement to find all samples in 'raw_data' directory
 ## Wildcard '{num}' must be equivalent to 'R1' or '1', meaning the read pair designation.
 SAMPLE_LIST,NUMS = glob_wildcards(ROWDATA + "/{sample}_L001_{num}" + SUF)
@@ -136,7 +135,7 @@ rule all:
     # stats = OUTPUTDIR + "/03_" + GROUP + "/" + PROJ + "-dada2-stats.qza",
     # filterrep = OUTPUTDIR + "/03_" + GROUP + "/" + PROJ + "-rep-filtered-seqs-dada2.qza",
     # filtertable = OUTPUTDIR + "/03_" + GROUP + "/" + PROJ + "-table-filtered-" + GROUP + ".qza",
-    # # # Taxonomy
+    ## Taxonomy
     # sklearn = OUTPUTDIR + "/04_taxonomy/" + PROJ + "-tax_sklearn.qza",
     # taxafiltertable = OUTPUTDIR + "/04_taxonomy/" + PROJ + "-taxa-table-filtered-" + GROUP + ".qza",
     # q2_repseq_filtered = OUTPUTDIR + "/04_taxonomy/" + PROJ + "-rep-filtered-seqs-taxa-" + GROUP + ".qza",
@@ -157,65 +156,70 @@ rule all:
     # # unrooted_tree = OUTPUTDIR + "/05_phylogeny/" + PROJ + "-unrooted-tree.qza",
     # # rooted_tree = OUTPUTDIR + "/05_phylogeny/" + PROJ + "-rooted-tree.qza",
     # # output_phylseq = OUTPUTDIR + "/05_phylogeny/" + PROJ + "-phylseq.tsv",
-    # # Phylogeny with SEPP
+    # Phylogeny with SEPP
     # tree = OUTPUTDIR + "/05_phylogeny/" + PROJ + "-rooted-tree.qza",
     # insertion = OUTPUTDIR + "/05_phylogeny/" + PROJ + "-insertion-placements.qza",
-    # ## Diversity
-    # ### Only if you need to remove sample
-    # filtertable_selectedsample = OUTPUTDIR + "/06_diversity/" + PROJ + "-taxa-table-filtered-selectedsample-" + GROUP + ".qza",
-    # table_count_qzv = OUTPUTDIR + "/06_diversity/" + PROJ + "-taxa-table-filtered-selectedsample-" + GROUP + ".qzv",
-    # rarefaction = OUTPUTDIR + "/06_diversity/" + PROJ + "-alpha_rarefaction_curves.qzv",
-    # d1 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/rarefied_table.qza",
-    # d2 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/faith_pd_vector.qza",
-    # d3 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/observed_features_vector.qza",
-    # d4 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/shannon_vector.qza",
-    # d5 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/evenness_vector.qza",
-    # d6 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/unweighted_unifrac_distance_matrix.qza",
-    # d7 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/weighted_unifrac_distance_matrix.qza",
-    # d8 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/jaccard_distance_matrix.qza",
-    # d9 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/bray_curtis_distance_matrix.qza",
-    # d11 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/unweighted_unifrac_pcoa_results.qza",
-    # d12 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/weighted_unifrac_pcoa_results.qza",
-    # d13 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/jaccard_pcoa_results.qza",
-    # d14 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/bray_curtis_pcoa_results.qza",
-    # d15 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/unweighted_unifrac_emperor.qzv",
-    # d16 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/weighted_unifrac_emperor.qzv",
-    # d17 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/jaccard_emperor.qzv",
-    # d18 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/bray_curtis_emperor.qzv",    
-    # alphasigni = expand(OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/{alphadiv}-group-significance.qzv", alphadiv=ALPHADIV),
-    # ## Correlation (need numeric values)
-    # coroutput = expand(OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/{alphadiv}-correlation.qzv", alphadiv=ALPHADIV),
+    ## Diversity
+    ### Only if you need to remove sample
+    filtertable_selectedsample = OUTPUTDIR + "/06_diversity/" + PROJ + "-taxa-table-filtered-selectedsample-" + GROUP + ".qza",
+    table_count_qzv = OUTPUTDIR + "/06_diversity/" + PROJ + "-taxa-table-filtered-selectedsample-" + GROUP + ".qzv",
+    rarefaction = OUTPUTDIR + "/06_diversity/" + PROJ + "-alpha_rarefaction_curves.qzv",
+    d1 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/rarefied_table.qza",
+    d2 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/faith_pd_vector.qza",
+    d3 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/observed_features_vector.qza",
+    d4 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/shannon_vector.qza",
+    d5 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/evenness_vector.qza",
+    d6 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/unweighted_unifrac_distance_matrix.qza",
+    d7 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/weighted_unifrac_distance_matrix.qza",
+    d8 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/jaccard_distance_matrix.qza",
+    d9 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/bray_curtis_distance_matrix.qza",
+    d11 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/unweighted_unifrac_pcoa_results.qza",
+    d12 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/weighted_unifrac_pcoa_results.qza",
+    d13 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/jaccard_pcoa_results.qza",
+    d14 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/bray_curtis_pcoa_results.qza",
+    d15 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/unweighted_unifrac_emperor.qzv",
+    d16 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/weighted_unifrac_emperor.qzv",
+    d17 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/jaccard_emperor.qzv",
+    d18 = OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/bray_curtis_emperor.qzv",    
+    alphasigni = expand(OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/{alphadiv}-group-significance.qzv", alphadiv=ALPHADIV),
+    ## Correlation (need numeric values)
+    coroutput = expand(OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/{alphadiv}-correlation.qzv", alphadiv=ALPHADIV),
     # site = expand(OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/{condition}-{betadiv}-significance.qzv", condition=CONDITION, betadiv=BETADIV),
     # ## PCOa with cinetic in the axis
-    # pcooutput = expand(OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/{pcoa}-emperor-days.qzv", pcoa=PCOA),
-    # # Differential abundance
-    # table_collapse = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-collapse-table-" + GROUP + ".qza",
-    # table_collapse_viz = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-collapse-table-" + GROUP + ".qzv",
-    # output_table_split = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_split-" + GROUP + ".txt",
-    # output_table_filtered = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_filtered-" + GROUP + ".txt",
-    # output_table_merged = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_merged-" + GROUP + ".txt",
-    # output_visualization_feature_table = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_merged-" + GROUP + ".qzv",
-    # # ## To do if you want remove samples for the differential analyses (with ANCOM)
-    # table_abond_selectedsample = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-selectedsample-" + GROUP + ".qza",
-    # table_abond_qzv = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-selectedsample-" + GROUP + ".qzv",
-    # table_abond_tsv = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-selectedsample-" + GROUP + ".tsv",
+    pcooutput = expand(OUTPUTDIR + "/06_diversity/" + PROJ + "-core-metrics-results/{pcoa}-emperor-days.qzv", pcoa=PCOA),
+    # ## Differential abundance
+    table_collapse = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-collapse-table-" + GROUP + ".qza",
+    table_collapse_viz = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-collapse-table-" + GROUP + ".qzv",
+    ## To do if you need to split different group for comparison
+    output_table_split = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_split-" + GROUP + ".txt",
+    output_table_filtered = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_filtered-" + GROUP + ".txt",
+    # ## End of the split
+    output_visualization_feature_table = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_merged-" + GROUP + ".qzv",
+    ## To do if you want remove samples for the differential analyses (with ANCOM)
+    table_abond_selectedsample = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-selectedsample-" + GROUP + ".qza",
+    table_abond_qzv = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-selectedsample-" + GROUP + ".qzv",
+    table_abond_tsv = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-selectedsample-" + GROUP + ".tsv",
+    ## Generation of the relative abundance table for LEfSe
     table_abond_lefse = report(OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_abond_lefse.tsv", caption = ROOTDIR + "/07_Report/lefse.rst", category="07 differential abundance"),
-    # table_abond_comp = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-comp-" + GROUP + ".qza",
-    # ancom = expand(OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-ancom-{column}-" + GROUP + ".qzv", column=COLUMN),
-    # #### Longitudinal analysis (NEED numerical data)
+    table_abond_comp = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-comp-" + GROUP + ".qza",
+    ancom = expand(OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-ancom-{column}-" + GROUP + ".qzv", column=COLUMN),
+    #### Longitudinal analysis (NEED numerical data)
+    ## If you have a features to see the paired difference tests between two groups
     # output_pairwise_difference = expand(OUTPUTDIR + "/08_longitudinal/" + PROJ + "-{feature}-pairwise-differences.qzv", feature=FEATURE),
     # output_pairwise_distance = expand(OUTPUTDIR + "/08_longitudinal/" + PROJ + "-{betadiv}-pairwise-distances.qzv", betadiv=BETADIV),
     # alphavolatility = expand(OUTPUTDIR + "/08_longitudinal/" + PROJ + "-{alphadiv}-volatility.qzv", alphadiv=ALPHADIV),
     # pcoaoutput = expand(OUTPUTDIR + "/08_longitudinal/" + PROJ + "-{pcoa}_pcoa_results.qzv", pcoa=PCOA),
+    # filter_rarefaction_table = OUTPUTDIR + "/06_diversity/" + PROJ + "-rarefaction-table-filtered-selectedsample-" + GROUP + ".qza",
+    # filter_rarefaction_table_qzv = OUTPUTDIR + "/06_diversity/" + PROJ + "-rarefaction-table-filtered-selectedsample-" + GROUP + ".qzv",
     # featlong1 = OUTPUTDIR + "/08_longitudinal/feat_volatility/filtered_table.qza",
     # featlong2 = OUTPUTDIR + "/08_longitudinal/feat_volatility/sample_estimator.qza",
     # featlong3 = OUTPUTDIR + "/08_longitudinal/feat_volatility/feature_importance.qza",
     # featlong4 = OUTPUTDIR + "/08_longitudinal/feat_volatility/accuracy_results.qzv",
     # featlong5 = OUTPUTDIR + "/08_longitudinal/feat_volatility/volatility_plot.qzv",
     # featlong6 = OUTPUTDIR + "/08_longitudinal/feat_volatility/feature_importance.qza",
-    # important_feature_table_top = expand(OUTPUTDIR + "/08_longitudinal/feat_volatility/important-feature-table-top-{heatmap}.qza", heatmap=HEATMAP),
-    # feature_heatmap = expand(OUTPUTDIR + "/08_longitudinal/feat_volatility/important-feature-{heatmap}-heatmap.qzv", heatmap=HEATMAP), 
-    # ## Predicting continuous (i.e., numerical) sample data
+    # # important_feature_table_top = expand(OUTPUTDIR + "/08_longitudinal/feat_volatility/important-feature-table-top-{heatmap}.qza", heatmap=HEATMAP),
+    # # feature_heatmap = expand(OUTPUTDIR + "/08_longitudinal/feat_volatility/important-feature-{heatmap}-heatmap.qzv", heatmap=HEATMAP), 
+    # # # ## Predicting continuous (i.e., numerical) sample data
     # regressor1 = OUTPUTDIR + "/08_longitudinal/regressor/sample_estimator.qza",
     # regressor2 = OUTPUTDIR + "/08_longitudinal/regressor/feature_importance.qza",
     # regressor3 = OUTPUTDIR + "/08_longitudinal/regressor/predictions.qza",
@@ -223,15 +227,15 @@ rule all:
     # regressor5 = OUTPUTDIR + "/08_longitudinal/regressor/model_summary.qzv",
     # regressor6 = OUTPUTDIR + "/08_longitudinal/regressor/feature_importance.qzv",
     # ## Maturity Index prediction
-    # maturity1 = OUTPUTDIR + "/08_longitudinal/maturity/maz_scores.qza",
-    # maturity2 = OUTPUTDIR + "/08_longitudinal/maturity/sample_estimator.qza",
-    # maturity3 = OUTPUTDIR + "/08_longitudinal/maturity/feature_importance.qza",
-    # maturity4 = OUTPUTDIR + "/08_longitudinal/maturity/predictions.qza",
-    # maturity5 = OUTPUTDIR + "/08_longitudinal/maturity/accuracy_results.qzv",
-    # maturity6 = OUTPUTDIR + "/08_longitudinal/maturity/volatility_plots.qzv",
-    # maturity7 = OUTPUTDIR + "/08_longitudinal/maturity/clustermap.qzv",
-    # maturity8 = OUTPUTDIR + "/08_longitudinal/maturity/model_summary.qzv",
-    # maturity9 = OUTPUTDIR + "/08_longitudinal/maturity/feature_importance.qzv",
+    # # maturity1 = OUTPUTDIR + "/08_longitudinal/maturity/maz_scores.qza",
+    # # maturity2 = OUTPUTDIR + "/08_longitudinal/maturity/sample_estimator.qza",
+    # # maturity3 = OUTPUTDIR + "/08_longitudinal/maturity/feature_importance.qza",
+    # # maturity4 = OUTPUTDIR + "/08_longitudinal/maturity/predictions.qza",
+    # # maturity5 = OUTPUTDIR + "/08_longitudinal/maturity/accuracy_results.qzv",
+    # # maturity6 = OUTPUTDIR + "/08_longitudinal/maturity/volatility_plots.qzv",
+    # # maturity7 = OUTPUTDIR + "/08_longitudinal/maturity/clustermap.qzv",
+    # # maturity8 = OUTPUTDIR + "/08_longitudinal/maturity/model_summary.qzv",
+    # # maturity9 = OUTPUTDIR + "/08_longitudinal/maturity/feature_importance.qzv",
 
 # ----------------------------------------------
 # setup singularity 

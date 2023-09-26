@@ -111,7 +111,7 @@ volatility:
     # Continuous, independent variable for the volatility visualizer
     state_column: "days_since_experiment_start"
     # Column with id to be represented
-    id_column: "Name-experiment"
+    id_column: "Name-sample"
     # Group column to be represented by default
     default_group_column: "group_experiment"
     # Alpha diversity metrics
@@ -130,11 +130,11 @@ volatility:
     # Number of jobs to run in parallel
     n_jobs: 10
     # Column to show for the heatmap of best features
-    features_column: "Body-site,Age-days"
+    features_column: "Age-days"
     # Number of feature to show in the heatmap
     feature_count: 30
     # Control group for the maturity index (MAZ)
-    control: "16_PP"
+    control: "16_Villi"
     # Test size for the MAZ
     test_size: 0.4
 
