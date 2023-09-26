@@ -1,6 +1,3 @@
-A METTRE A JOUR
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4772710.svg)](https://doi.org/10.5281/zenodo.4772710)
-
 # Microbiome Analysis Workflow
 
 ## Author
@@ -38,7 +35,7 @@ Configure the workflow according to your needs via editing the files and reposit
 
 - Load snakemake from a docker container and run the workflow from the root by using these commands:
 
-`singularity run docker://snakemake/snakemake:v6.3.0`
+`singularity run --bind ${PWD}:${PWD} docker://snakemake/snakemake:v6.3.0`
 
 - Then execute the workflow locally via
 

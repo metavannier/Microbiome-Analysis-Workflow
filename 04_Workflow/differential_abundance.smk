@@ -41,8 +41,8 @@ rule filter_group:
         output_table_split = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_split-" + GROUP + ".txt"
     params:
         group = GROUPCONDITION,
-        table_split = expand(OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_split-{group}-" + GROUP + ".qza", group=GROUPCONDITION),
-        table_split_viz = expand(OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_split-{group}-" + GROUP + ".qzv", group=GROUPCONDITION),
+        table_split = expand(OUTPUTDIR + "/07_differential_abundance/frequency_filtering/" + PROJ + "-table_split-{group}-" + GROUP + ".qza", group=GROUPCONDITION),
+        table_split_viz = expand(OUTPUTDIR + "/07_differential_abundance/frequency_filtering/" + PROJ + "-table_split-{group}-" + GROUP + ".qzv", group=GROUPCONDITION),
         metadata = ROOTDIR + METADATA
     conda:
         ROOTDIR + "/02_Container/qiime2.yaml"
@@ -64,12 +64,12 @@ rule filter_group:
 ## Frequency filtering of each feature-table corresponding to the different group of samples
 rule filter_features:
     input:
-        table_split = expand(OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_split-{group}-" + GROUP + ".qza", group=GROUPCONDITION),
+        table_split = expand(OUTPUTDIR + "/07_differential_abundance/frequency_filtering/" + PROJ + "-table_split-{group}-" + GROUP + ".qza", group=GROUPCONDITION),
     output:
         output_table_filtered = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_filtered-" + GROUP + ".txt"
     params:
         group = GROUPCONDITION,
-        table_filtered = expand(OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_filtered-{group}-" + GROUP + ".qza", group=GROUPCONDITION),
+        table_filtered = expand(OUTPUTDIR + "/07_differential_abundance/frequency_filtering/" + PROJ + "-table_filtered-{group}-" + GROUP + ".qza", group=GROUPCONDITION),
         metadata = ROOTDIR + METADATA
     log:
         LOGDIR + "/07_differential_abundance/" + PROJ + "_" + GROUP + "-filter_features.log"
@@ -95,7 +95,7 @@ rule filter_features:
 ## LA voir comment mettre la list en shell
 rule merge_feature_table:
     input:
-        table_filtered = expand(OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_filtered-{group}-" + GROUP + ".qza", group=GROUPCONDITION),
+        table_filtered = expand(OUTPUTDIR + "/07_differential_abundance/frequency_filtering/" + PROJ + "-table_filtered-{group}-" + GROUP + ".qza", group=GROUPCONDITION),
     output:
         output_table_merged = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_merged-" + GROUP + ".txt",
         table_merged = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_merged-" + GROUP + ".qza",
@@ -106,8 +106,7 @@ rule merge_feature_table:
         table_filtered=({input.table_filtered})
         table_merged=({output.table_merged})
         len=${{#table_filtered[@]}}
-        list_table_filtered=("/media/thomas/data/tomas_weaning_011222/05_Output/07_differential_abundance/weaning-table_filtered-16_PP_villi-dada2.qza
- /media/thomas/data/tomas_weaning_011222/05_Output/07_differential_abundance/weaning-table_filtered-19_PP_villi-dada2.qza /media/thomas/data/tomas_weaning_011222/05_Output/07_differential_abundance/weaning-table_filtered-21_PP_villi-dada2.qza /media/thomas/data/tomas_weaning_011222/05_Output/07_differential_abundance/weaning-table_filtered-23_PP_villi-dada2.qza /media/thomas/data/tomas_weaning_011222/05_Output/07_differential_abundance/weaning-table_filtered-25_PP_villi-dada2.qza /media/thomas/data/tomas_weaning_011222/05_Output/07_differential_abundance/weaning-table_filtered-28_PP_villi-dada2.qza /media/thomas/data/tomas_weaning_011222/05_Output/07_differential_abundance/weaning-table_filtered-49_PP_villi-dada2.qza")
+        list_table_filtered=("05_Output/07_differential_abundance/frequency_filtering/weaning-table_filtered-16_PP-dada2.qza  05_Output/07_differential_abundance/frequency_filtering/weaning-table_filtered-16_Feces-dada2.qza 05_Output/07_differential_abundance/frequency_filtering/weaning-table_filtered-16_IC-dada2.qza 05_Output/07_differential_abundance/frequency_filtering/weaning-table_filtered-16_Villi-dada2.qza 05_Output/07_differential_abundance/frequency_filtering/weaning-table_filtered-19_PP-dada2.qza 05_Output/07_differential_abundance/frequency_filtering/weaning-table_filtered-19_Feces-dada2.qza 05_Output/07_differential_abundance/frequency_filtering/weaning-table_filtered-19_IC-dada2.qza 05_Output/07_differential_abundance/frequency_filtering/weaning-table_filtered-19_Villi-dada2.qza 05_Output/07_differential_abundance/frequency_filtering/weaning-table_filtered-21_PP-dada2.qza 05_Output/07_differential_abundance/frequency_filtering/weaning-table_filtered-21_Feces-dada2.qza 05_Output/07_differential_abundance/frequency_filtering/weaning-table_filtered-21_IC-dada2.qza 05_Output/07_differential_abundance/frequency_filtering/weaning-table_filtered-21_Villi-dada2.qza 05_Output/07_differential_abundance/frequency_filtering/weaning-table_filtered-23_PP-dada2.qza 05_Output/07_differential_abundance/frequency_filtering/weaning-table_filtered-23_Feces-dada2.qza 05_Output/07_differential_abundance/frequency_filtering/weaning-table_filtered-23_IC-dada2.qza 05_Output/07_differential_abundance/frequency_filtering/weaning-table_filtered-23_Villi-dada2.qza 05_Output/07_differential_abundance/frequency_filtering/weaning-table_filtered-25_PP-dada2.qza 05_Output/07_differential_abundance/frequency_filtering/weaning-table_filtered-25_Feces-dada2.qza 05_Output/07_differential_abundance/frequency_filtering/weaning-table_filtered-25_IC-dada2.qza 05_Output/07_differential_abundance/frequency_filtering/weaning-table_filtered-25_Villi-dada2.qza 05_Output/07_differential_abundance/frequency_filtering/weaning-table_filtered-28_PP-dada2.qza 05_Output/07_differential_abundance/frequency_filtering/weaning-table_filtered-28_Feces-dada2.qza 05_Output/07_differential_abundance/frequency_filtering/weaning-table_filtered-28_IC-dada2.qza 05_Output/07_differential_abundance/frequency_filtering/weaning-table_filtered-28_Villi-dada2.qza 05_Output/07_differential_abundance/frequency_filtering/weaning-table_filtered-49_PP-dada2.qza 05_Output/07_differential_abundance/frequency_filtering/weaning-table_filtered-49_Feces-dada2.qza 05_Output/07_differential_abundance/frequency_filtering/weaning-table_filtered-49_IC-dada2.qza 05_Output/07_differential_abundance/frequency_filtering/weaning-table_filtered-49_Villi-dada2.qza")
         qiime feature-table merge \
         --i-tables ${{list_table_filtered}} \
         --o-merged-table ${{table_merged}}
@@ -133,20 +132,41 @@ rule filter_sample:
         table_merged = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_merged-" + GROUP + ".qza",
     output:
         table_abond_selectedsample = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-selectedsample-" + GROUP + ".qza",
-        table_abond_qzv = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-selectedsample-" + GROUP + ".qzv"
+        table_abond_qzv = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-selectedsample-" + GROUP + ".qzv",
+        table_abond_tsv = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-selectedsample-" + GROUP + ".tsv",
     params:
-        metadata = ROOTDIR + RMSAMPLE
+        metadata = ROOTDIR + RMSAMPLE,
+        path_biom = OUTPUTDIR + "/07_differential_abundance/",
+        table_biom = OUTPUTDIR + "/07_differential_abundance/feature-table.biom",
     conda:
         ROOTDIR + "/02_Container/qiime2.yaml"
     shell:
         """
         qiime feature-table filter-samples \
         --i-table {input.table_merged} \
-        --m-metadata-file {params.metadata}\
-        --p-exclude-ids True \
+        --m-metadata-file {params.metadata} \
+        --p-no-exclude-ids FALSE \
+        --p-filter-empty-features TRUE \
         --o-filtered-table {output.table_abond_selectedsample}
         qiime metadata tabulate --m-input-file {output.table_abond_selectedsample} --o-visualization {output.table_abond_qzv}
+        qiime tools export --input-path {output.table_abond_selectedsample} --output-path {params.path_biom}
+        biom convert -i {params.table_biom} -o {output.table_abond_tsv} --to-tsv --header-key taxonomy
         """
+
+# Formating table abundance of the taxon for LEfse
+rule lefse:
+    input:
+        table_abond_tsv = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-selectedsample-" + GROUP + ".tsv",
+    output:
+        table_abond_lefse = report(OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table_abond_lefse.tsv", caption = ROOTDIR + "/07_Report/lefse.rst", category="07 differential abundance"),
+    params:
+        metadata = ROOTDIR + RMSAMPLE,
+    conda:
+        ROOTDIR + "/02_Container/lefse.yaml"
+    message:
+        "Run formating table abundance of the taxon for LEfse"
+    script:
+        SCRIPTSDIR + "/lefse.R"
 
 ############################
 
@@ -166,7 +186,6 @@ rule pseudocount:
         --o-composition-table {output.table_abond_comp}
         """
 
-## LA FAIRE LES GROUPES POUR COMPARAISON DEUX A DEUX (demander à Julie)
 rule ancom:
     input:
         table_abond_comp = OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-table-abund-comp-" + GROUP + ".qza"
@@ -174,7 +193,7 @@ rule ancom:
         ancom = report(expand(OUTPUTDIR + "/07_differential_abundance/" + PROJ + "-ancom-{column}-" + GROUP + ".qzv", column=COLUMN), caption = ROOTDIR + "/07_Report/ancom.rst", category="07 differential abundance")
     params:
         column = COLUMN,
-        metadata = ROOTDIR + "/sample-metadata.tsv"
+        metadata = ROOTDIR + RMSAMPLE
     log:
         LOGDIR + "/07_differential_abundance/" + PROJ + "_" + GROUP + "-ancom.log"
     conda:

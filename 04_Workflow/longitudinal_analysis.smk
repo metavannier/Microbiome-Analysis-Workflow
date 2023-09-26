@@ -4,7 +4,7 @@ rule pairwise_difference:
     output:
         output_pairwise_difference = report(expand(OUTPUTDIR + "/08_longitudinal/" + PROJ + "-{feature}-pairwise-differences.qzv", feature=FEATURE), caption = ROOTDIR + "/07_Report/pairwise_difference.rst", category="08 longitudinal/pairwise difference")
     params:
-        metadata = ROOTDIR + "/sample-metadata.tsv",
+        metadata = ROOTDIR + RMSAMPLE,
     conda:
         ROOTDIR + "/02_Container/qiime2.yaml"
     shell:
@@ -33,7 +33,7 @@ rule pairwise_distance:
     output:
         output_pairwise_distance = report(expand(OUTPUTDIR + "/08_longitudinal/" + PROJ + "-{betadiv}-pairwise-distances.qzv", betadiv=BETADIV), caption = ROOTDIR + "/07_Report/pairwise_distance.rst", category="08 longitudinal/pairwise distance")
     params:
-        metadata = ROOTDIR + "/sample-metadata.tsv",
+        metadata = ROOTDIR + RMSAMPLE,
     conda:
         ROOTDIR + "/02_Container/qiime2.yaml"
     shell:
@@ -109,9 +109,30 @@ rule volatility_pcoa:
         done
         """
 
-rule feature_volatility:
+rule filter_rarefaction_table:
     input:
         table_collapse = OUTPUTDIR + "/04_taxonomy/" + PROJ + "-rarefaction-table-filtered-" + GROUP + ".qza",
+    output:
+        filter_rarefaction_table = OUTPUTDIR + "/06_diversity/" + PROJ + "-rarefaction-table-filtered-selectedsample-" + GROUP + ".qza",
+        filter_rarefaction_table_qzv = OUTPUTDIR + "/06_diversity/" + PROJ + "-rarefaction-table-filtered-selectedsample-" + GROUP + ".qzv"
+    params:
+        metadata = ROOTDIR + RMSAMPLE
+    conda:
+        ROOTDIR + "/02_Container/qiime2.yaml"
+    shell:
+        """
+        qiime feature-table filter-samples \
+        --i-table {input.table_collapse} \
+        --m-metadata-file {params.metadata}\
+        --p-no-exclude-ids FALSE \
+        --p-filter-empty-features TRUE \
+        --o-filtered-table {output.filter_rarefaction_table}
+        qiime metadata tabulate --m-input-file {output.filter_rarefaction_table} --o-visualization {output.filter_rarefaction_table_qzv}        
+        """
+
+rule feature_volatility:
+    input:
+        filter_rarefaction_table = OUTPUTDIR + "/06_diversity/" + PROJ + "-rarefaction-table-filtered-selectedsample-" + GROUP + ".qza",
         sklearn = OUTPUTDIR + "/04_taxonomy/" + PROJ + "-tax_sklearn.qza",
     output:
         featlong1 = OUTPUTDIR + "/08_longitudinal/feat_volatility/filtered_table.qza",
@@ -121,13 +142,13 @@ rule feature_volatility:
         featlong5 = report(OUTPUTDIR + "/08_longitudinal/feat_volatility/volatility_plot.qzv", caption = ROOTDIR + "/07_Report/feature_volatility.rst", category="08 longitudinal/feature volatility"),
         featlong6 = report(OUTPUTDIR + "/08_longitudinal/feat_volatility/feature_importance.qzv", caption = ROOTDIR + "/07_Report/feature_volatility.rst", category="08 longitudinal/feature volatility")
     params:
-        metadata = ROOTDIR + "/sample-metadata.tsv",
+        metadata = ROOTDIR + RMSAMPLE,
     conda:
         ROOTDIR + "/02_Container/qiime2.yaml"
     shell:  
         """
         qiime longitudinal feature-volatility \
-        --i-table {input.table_collapse} \
+        --i-table {input.filter_rarefaction_table} \
         --m-metadata-file {params.metadata} \
         --p-state-column {config[volatility][state_column]} \
         --p-individual-id-column {config[volatility][id_column]} \
@@ -149,13 +170,13 @@ rule feature_volatility:
 
 rule feature_heatmap:
     input:
-        table_collapse = OUTPUTDIR + "/04_taxonomy/" + PROJ + "-rarefaction-table-filtered-" + GROUP + ".qza",
+        filter_rarefaction_table = OUTPUTDIR + "/06_diversity/" + PROJ + "-rarefaction-table-filtered-selectedsample-" + GROUP + ".qza",
         featlong3 = OUTPUTDIR + "/08_longitudinal/feat_volatility/feature_importance.qza"
     output:
         important_feature_table_top = expand(OUTPUTDIR + "/08_longitudinal/feat_volatility/important-feature-table-top-{heatmap}.qza", heatmap=HEATMAP),
         feature_heatmap = report(expand(OUTPUTDIR + "/08_longitudinal/feat_volatility/important-feature-{heatmap}-heatmap.qzv", heatmap=HEATMAP), caption = ROOTDIR + "/07_Report/feature_heatmap.rst", category="08 longitudinal08 longitudinal/feature volatility")
     params:
-        metadata = ROOTDIR + "/sample-metadata.tsv",
+        metadata = ROOTDIR + RMSAMPLE,
     conda:
         ROOTDIR + "/02_Container/qiime2.yaml"
     shell:  
@@ -167,7 +188,7 @@ rule feature_heatmap:
         for (( i=0; i<$len; i=i+1 ))
         do 
         qiime sample-classifier heatmap \
-        --i-table {input.table_collapse} \
+        --i-table {input.filter_rarefaction_table} \
         --i-importance {input.featlong3} \
         --m-sample-metadata-file {params.metadata} \
         --m-sample-metadata-column ${{heatmap[$i]}} \
@@ -182,7 +203,7 @@ rule feature_heatmap:
 
 rule regress_samples:
     input:
-        table_collapse = OUTPUTDIR + "/04_taxonomy/" + PROJ + "-rarefaction-table-filtered-" + GROUP + ".qza",
+        filter_rarefaction_table = OUTPUTDIR + "/06_diversity/" + PROJ + "-rarefaction-table-filtered-selectedsample-" + GROUP + ".qza",
         sklearn = OUTPUTDIR + "/04_taxonomy/" + PROJ + "-tax_sklearn.qza",
     output:
         regressor1 = OUTPUTDIR + "/08_longitudinal/regressor/sample_estimator.qza",
@@ -192,13 +213,13 @@ rule regress_samples:
         regressor5 = OUTPUTDIR + "/08_longitudinal/regressor/model_summary.qzv",
         regressor6 = report(OUTPUTDIR + "/08_longitudinal/regressor/feature_importance.qzv", caption = ROOTDIR + "/07_Report/regress_samples.rst", category="08 longitudinal/regression")
     params:
-        metadata = ROOTDIR + "/sample-metadata.tsv",
+        metadata = ROOTDIR + RMSAMPLE,
     conda:
         ROOTDIR + "/02_Container/qiime2.yaml"
     shell:  
         """
         qiime sample-classifier regress-samples \
-        --i-table {input.table_collapse} \
+        --i-table {input.filter_rarefaction_table} \
         --m-metadata-file {params.metadata} \
         --m-metadata-column {config[volatility][state_column]} \
         --p-estimator {config[volatility][p_estimator]} \
@@ -218,7 +239,7 @@ rule regress_samples:
 
 rule maturity_index:
     input:
-        table_collapse =  OUTPUTDIR + "/04_taxonomy/" + PROJ + "-rarefaction-table-filtered-" + GROUP + ".qza",
+        filter_rarefaction_table = OUTPUTDIR + "/06_diversity/" + PROJ + "-rarefaction-table-filtered-selectedsample-" + GROUP + ".qza",
         sklearn = OUTPUTDIR + "/04_taxonomy/" + PROJ + "-tax_sklearn.qza",
     output:
         maturity1 = OUTPUTDIR + "/08_longitudinal/maturity/maz_scores.qza",
@@ -237,7 +258,7 @@ rule maturity_index:
     shell:  
         """
         qiime longitudinal maturity-index \
-        --i-table {input.table_collapse} \
+        --i-table {input.filter_rarefaction_table} \
         --m-metadata-file {params.metadata} \
         --p-state-column {config[volatility][state_column]} \
         --p-individual-id-column {config[volatility][id_column]} \
