@@ -1,0 +1,3 @@
+sample-id	forward-absolute-filepath	reverse-absolute-filepath
+M6969	$PWD/05_Output/00_trimmed/M6969_S2_L001_R1_001.fastq.gz	$PWD/05_Output/00_trimmed/M6969_S2_L001_R2_001.fastq.gz
+M6970	$PWD/05_Output/00_trimmed/M6970_S3_L001_R1_001.fastq.gz	$PWD/05_Output/00_trimmed/M6970_S3_L001_R2_001.fastq.gz

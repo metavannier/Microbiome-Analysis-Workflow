@@ -1,0 +1,17 @@
+# Data, references and results (not versioned)
+00_RowData/*
+!00_RowData/README.md
+01_Reference/*
+!01_Reference/README.md
+05_Output/
+08_Log/
+reports/
+# Snakemake, conda and Apptainer caches
+.snakemake/
+.cache/
+.config/
+.conda/
+.apptainer/
+# Reports
+*report*.html
+*report*.zip

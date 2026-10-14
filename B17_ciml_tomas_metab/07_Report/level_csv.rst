@@ -1,0 +1,1 @@
+Abundance (read counts) of each taxon at the taxonomic level {{ snakemake.wildcards.level }} for each sample, followed by the sample metadata. This file is extracted from the taxa bar plot: it is identical to the "Download CSV" of this level in QIIME 2 View. It is the input of the MetaboAnalyst tables.

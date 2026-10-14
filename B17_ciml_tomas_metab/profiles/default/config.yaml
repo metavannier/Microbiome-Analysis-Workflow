@@ -1,0 +1,7 @@
+# Default options of this workflow (Snakemake workflow profile, loaded
+# automatically). The command line or run_workflow.sh can override them.
+printshellcmds: true
+rerun-incomplete: true
+show-failed-logs: true
+keep-going: true
+latency-wait: 30

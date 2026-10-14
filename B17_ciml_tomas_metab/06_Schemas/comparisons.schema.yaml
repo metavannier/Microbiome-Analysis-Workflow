@@ -1,0 +1,35 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+
+description: >
+  One row of comparisons.tsv = one comparison (one report).
+  subset: conditions selecting the samples, 'COLUMN=VALUE[,VALUE];COLUMN=VALUE'
+  (empty = all the samples); group_columns: metadata column(s) compared,
+  comma-separated; filter_column: column whose groups are used for the
+  frequency filtering of the differential abundance (default: the first
+  group column).
+
+type: object
+
+properties:
+  comparison:
+    type: string
+    pattern: "^[A-Za-z0-9][A-Za-z0-9_.+-]*$"
+  level:
+    type: string
+  subset:
+    type: string
+  group_columns:
+    type: string
+    minLength: 1
+  filter_column:
+    type: string
+  description:
+    type: string
+
+required:
+  - comparison
+  - subset
+  - group_columns
+  - filter_column
+  - level
+  - description

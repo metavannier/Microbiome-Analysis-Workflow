@@ -1,0 +1,242 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+
+description: snakemake configuration file (config.yaml)
+
+type: object
+
+properties:
+  metadata:
+    type: string
+  manifest:
+    type: string
+  comparisons:
+    type: string
+  run_comparisons:
+    oneOf:
+      - type: string
+      - type: array
+        items:
+          type: string
+  tmpdir:
+    type: string
+
+  project:
+    type: object
+    properties:
+      name:
+        type: string
+        pattern: "^[A-Za-z0-9_.-]+$"
+      raw_dir:
+        type: string
+      r1_suffix:
+        type: string
+        pattern: "\\.fastq\\.gz$"
+      r2_suffix:
+        type: string
+        pattern: "\\.fastq\\.gz$"
+      type:
+        type: string
+      format:
+        type: string
+      exclude_samples:
+        type: array
+        items:
+          type: string
+    required: [name, raw_dir, r1_suffix, r2_suffix, type, format]
+
+  containers:
+    type: object
+    properties:
+      qiime2:
+        type: string
+      fastqc:
+        type: string
+      trimmomatic:
+        type: string
+      multiqc:
+        type: string
+    required: [qiime2, fastqc, trimmomatic, multiqc]
+
+  trimmomatic:
+    type: object
+    properties:
+      trimmer:
+        type: string
+      extra:
+        type: string
+      threads:
+        type: integer
+        minimum: 1
+    required: [trimmer, extra, threads]
+
+  primer:
+    type: object
+    properties:
+      primerF:
+        type: string
+      primerR:
+        type: string
+      primer_err:
+        type: number
+        minimum: 0
+        maximum: 1
+      primer_overlap:
+        type: integer
+        minimum: 1
+      threads:
+        type: integer
+        minimum: 1
+    required: [primerF, primerR, primer_err, primer_overlap, threads]
+
+  dada2:
+    type: object
+    properties:
+      truncation_err:
+        type: integer
+      truncation_len-f:
+        type: integer
+      truncation_len-r:
+        type: integer
+      trim-left-f:
+        type: integer
+      trim-left-r:
+        type: integer
+      quality_err-f:
+        type: number
+      quality_err-r:
+        type: number
+      seqlenth:
+        type: integer
+      training:
+        type: integer
+      chimera:
+        type: string
+        enum: ["consensus", "none"]
+      threads:
+        type: integer
+        minimum: 1
+    required:
+      - truncation_err
+      - truncation_len-f
+      - truncation_len-r
+      - trim-left-f
+      - trim-left-r
+      - quality_err-f
+      - quality_err-r
+      - seqlenth
+      - training
+      - chimera
+      - threads
+
+  taxonomy:
+    type: object
+    properties:
+      classifier:
+        type: string
+      confidence:
+        type: number
+      njobs:
+        type: integer
+        minimum: 1
+      exclude:
+        type: string
+        minLength: 1
+    required: [classifier, confidence, njobs, exclude]
+
+  phylogeny:
+    type: object
+    properties:
+      method:
+        type: string
+        enum: ["sepp", "fasttree"]
+      seppdb:
+        type: string
+      threads:
+        type: integer
+        minimum: 1
+    required: [method, seppdb, threads]
+
+  diversity:
+    type: object
+    properties:
+      mindepth:
+        type: integer
+        minimum: 1
+      maxdepth:
+        type: integer
+        minimum: 1
+      samplingdepth:
+        type: integer
+        minimum: 1
+      random_seed:
+        type: ["integer", "null"]
+        minimum: 0
+      threads:
+        type: integer
+        minimum: 1
+      alpha_metrics:
+        type: array
+        items:
+          type: string
+          enum: ["shannon", "observed_features", "evenness", "faith_pd"]
+      beta_metrics:
+        type: array
+        items:
+          type: string
+          enum: ["jaccard", "bray_curtis", "unweighted_unifrac", "weighted_unifrac"]
+      permutations:
+        type: integer
+        minimum: 1
+    required: [mindepth, maxdepth, samplingdepth, threads, alpha_metrics, beta_metrics, permutations]
+
+  differential_abundance:
+    type: object
+    properties:
+      taxa_level:
+        type: integer
+        minimum: 1
+      min_frequency:
+        type: integer
+        minimum: 0
+      min_samples:
+        type: integer
+        minimum: 0
+    required: [taxa_level, min_frequency, min_samples]
+
+  metaboanalyst:
+    type: object
+    properties:
+      taxa_level:
+        type: integer
+        minimum: 1
+      relative_abundance:
+        type: boolean
+      drop_zero_taxa:
+        type: boolean
+      min_group_prevalence:
+        type: integer
+        minimum: 0
+      sep:
+        type: string
+        minLength: 1
+        maxLength: 1
+      decimal:
+        type: string
+        minLength: 1
+        maxLength: 1
+    required: [taxa_level, relative_abundance, drop_zero_taxa, min_group_prevalence, sep, decimal]
+
+required:
+  - metadata
+  - manifest
+  - comparisons
+  - project
+  - containers
+  - trimmomatic
+  - primer
+  - dada2
+  - taxonomy
+  - phylogeny
+  - diversity
+  - differential_abundance
+  - metaboanalyst

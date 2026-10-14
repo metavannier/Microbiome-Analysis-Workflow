@@ -1,0 +1,133 @@
+# ======================================================================
+#   Configuration of the microbiome workflow - project undernutrition
+# ======================================================================
+
+# Sample sheets
+metadata: "sample-metadata.tsv"    # QIIME 2 sample metadata
+manifest: "manifest.tsv"           # QIIME 2 manifest (03_Script/make_manifest.py)
+comparisons: "comparisons.tsv"     # comparisons to analyse (one report each)
+
+# Comparisons to run: "all", "none" (common part only) or comparison IDs
+# separated by commas. Usually given on the command line:
+#   ./run_workflow.sh run L1_Feces_Female_CTL_vs_SAM
+#   snakemake ... --config run_comparisons=L1_Feces_Female_CTL_vs_SAM
+run_comparisons: "all"
+
+# Optional directory for the QIIME 2 temporary files (needs space).
+# Empty = system default ($TMPDIR or /tmp). With Apptainer, a directory
+# outside the project must also be bound (--apptainer-args "--bind DIR").
+tmpdir: ""
+
+project:
+    # Project name (prefix of the output files)
+    name: "undernutrition"
+    # Raw paired-end reads: <sample>_S<n>_L001_R1_001.fastq.gz / _R2_001.fastq.gz
+    raw_dir: "00_RowData"
+    r1_suffix: "_R1_001.fastq.gz"
+    r2_suffix: "_R2_001.fastq.gz"
+    # QIIME 2 import (see manifest.tsv)
+    type: "SampleData[PairedEndSequencesWithQuality]"
+    format: "PairedEndFastqManifestPhred33V2"
+    # Samples to leave out of every comparison (e.g. failed libraries)
+    exclude_samples: []
+
+# Software: containers used with --sdm apptainer (the conda environments of
+# 02_Container are used with --sdm conda)
+containers:
+    qiime2: "docker://quay.io/qiime2/qiime2:2026.7"
+    fastqc: "docker://staphb/fastqc:0.12.1"
+    trimmomatic: "docker://staphb/trimmomatic:0.40"
+    multiqc: "docker://multiqc/multiqc:v1.35"
+
+# Trimmomatic (quality trimming of the raw reads)
+trimmomatic:
+    trimmer: "LEADING:2 TRAILING:2 SLIDINGWINDOW:4:2 MINLEN:25"
+    extra: ""
+    threads: 4
+
+primer:
+    # primers for 16S "V3-V4" regions (341F / 805R)
+    primerF: CCTACGGGNGGCWGCAG
+    primerR: GACTACHVGGGTATCTAATCC
+    # Parada et al. 2016 MEP primers for 16S
+    primer_err: 0.1
+    primer_overlap: 3
+    threads: 4
+
+# Dada2
+dada2:
+    truncation_err: 2
+    truncation_len-f: 229
+    truncation_len-r: 229
+    trim-left-f: 0
+    trim-left-r: 0
+    quality_err-f: 2
+    quality_err-r: 2
+    seqlenth: 400 # IMPORTANT parameter corresponding to the minimum length of merged reads to keep
+    training: 1000000 # number of reads used to train the error model (default: 1000000)
+    # "consensus" or "none". The former "pooled" method was removed from
+    # QIIME 2 in release 2025.4 (q2-dada2 bug fix #171): "consensus" is the
+    # DADA2 and QIIME 2 default.
+    chimera: consensus
+    threads: 12
+
+# Taxonomy
+taxonomy:
+    # Pre-trained naive Bayes classifier for QIIME 2 2026.7 downloaded from
+    # https://www.arb-silva.de/current-release/QIIME2/2026.7/SSU/V3V4-341f-806r/uniform
+    # Put the .qza in 01_Reference/ and write its exact file name here.
+    classifier: "01_Reference/silva-V3V4-341f-806r-uniform-classifier.qza"
+    confidence: 0.7
+    njobs: 4 # Be careful with the memory usage
+    # Taxa removed from the feature table (comma-separated, case-insensitive)
+    exclude: "d__Eukaryota"
+
+# Phylogeny
+phylogeny:
+    # method to use to construct the tree (MUST BE fasttree or sepp)
+    method: "sepp"
+    # SEPP reference database
+    seppdb: "01_Reference/sepp-refs-silva-128.qza"
+    threads: 10
+
+# Diversity (each comparison)
+diversity:
+    mindepth: 10
+    # Axis limit of the alpha rarefaction plot: take about the median
+    # frequency per sample (04_taxonomy/undernutrition-taxa-table-filtered-dada2.qzv)
+    maxdepth: 64500
+    # Rarefaction depth: see the alpha rarefaction curves (when the alpha
+    # diversity stabilises) and the feature table summary (samples below
+    # this depth are removed from the diversity and abundance analyses)
+    samplingdepth: 7500
+    # Seed of the rarefaction of core-metrics (same results when rerun);
+    # null = random seed (behaviour of the previous workflow)
+    random_seed: 1234
+    threads: 4
+    alpha_metrics: ["shannon", "observed_features", "evenness", "faith_pd"]
+    beta_metrics: ["jaccard", "bray_curtis", "unweighted_unifrac", "weighted_unifrac"]
+    permutations: 999
+
+# Differential abundance (each comparison)
+differential_abundance:
+    # taxonomic level of the collapsed table (7 = species)
+    taxa_level: 7
+    # frequency filtering by group of samples ('filter_column' of
+    # comparisons.tsv): a taxon is kept in a group if its frequency is
+    # >= min_frequency and it is present in >= min_sample samples
+    min_frequency: 50
+    min_samples: 2
+
+# Taxon abundance tables for MetaboAnalyst (each comparison)
+metaboanalyst:
+    # level-N.csv of the taxa bar plot (7 = species)
+    taxa_level: 7
+    # relative abundance (proportion of the reads of the sample) or counts
+    relative_abundance: true
+    # remove the taxa absent from all the samples of the comparison
+    drop_zero_taxa: true
+    # keep only the taxa present in >= N samples of at least one group (0 = off)
+    min_group_prevalence: 0
+    # MetaboAnalyst reads comma-separated files with '.' as decimal mark
+    sep: ","
+    decimal: "."

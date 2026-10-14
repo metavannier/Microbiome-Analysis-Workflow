@@ -1,0 +1,13 @@
+comparison	level	subset	group_columns	filter_column	description
+L1_Feces_Female_CTL_vs_SAM	1	Body-site=Feces;Sexe=Female	Diet	Diet	Level 1 - Feces, females: CTL vs SAM (Diet)
+L1_Feces_Male_CTL_vs_SAM	1	Body-site=Feces;Sexe=Male	Diet	Diet	Level 1 - Feces, males: CTL vs SAM (Diet)
+L1_Caecum_Female_CTL_vs_SAM	1	Body-site=Caecum;Sexe=Female	Diet	Diet	Level 1 - Caecum, females: CTL vs SAM (Diet)
+L1_Caecum_Male_CTL_vs_SAM	1	Body-site=Caecum;Sexe=Male	Diet	Diet	Level 1 - Caecum, males: CTL vs SAM (Diet)
+L1_Ileal_Female_CTL_vs_SAM	1	Body-site=Ileal;Sexe=Female	Diet	Diet	Level 1 - Ileal, females: CTL vs SAM (Diet)
+L1_Ileal_Male_CTL_vs_SAM	1	Body-site=Ileal;Sexe=Male	Diet	Diet	Level 1 - Ileal, males: CTL vs SAM (Diet)
+L2_Feces_CTL_vs_SAM	2	Body-site=Feces	Diet,Name-experiment	Name-experiment	Level 2 - Feces, both sexes: CTL vs SAM (Diet) and the four conditions sex x diet (Name-experiment)
+L2_Caecum_CTL_vs_SAM	2	Body-site=Caecum	Diet,Name-experiment	Name-experiment	Level 2 - Caecum, both sexes: CTL vs SAM (Diet) and the four conditions sex x diet (Name-experiment)
+L2_Ileal_CTL_vs_SAM	2	Body-site=Ileal	Diet,Name-experiment	Name-experiment	Level 2 - Ileal, both sexes: CTL vs SAM (Diet) and the four conditions sex x diet (Name-experiment)
+L3_Feces_SAM_Female_vs_Male	3	Body-site=Feces;Diet=SAM	Sexe	Sexe	Level 3 - Feces, SAM diet: females vs males (Sexe)
+L3_Caecum_SAM_Female_vs_Male	3	Body-site=Caecum;Diet=SAM	Sexe	Sexe	Level 3 - Caecum, SAM diet: females vs males (Sexe)
+L3_Ileal_SAM_Female_vs_Male	3	Body-site=Ileal;Diet=SAM	Sexe	Sexe	Level 3 - Ileal, SAM diet: females vs males (Sexe)

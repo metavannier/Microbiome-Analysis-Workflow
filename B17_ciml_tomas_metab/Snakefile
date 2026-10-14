@@ -1,0 +1,63 @@
+# ======================================================================
+#   Microbiome analysis workflow (16S V3-V4, QIIME 2 2026.7)
+#   Project B17_ciml_tomas_metab - undernutrition
+#
+#   Run from this directory, e.g. ./run_workflow.sh run <comparison>
+#   (see README.md). Comparisons are defined in comparisons.tsv and
+#   selected with --config run_comparisons=<ID|all|none>.
+# ======================================================================
+
+from snakemake.utils import min_version, validate
+
+min_version("9.0")
+
+
+configfile: "config.yaml"
+
+
+validate(config, schema="06_Schemas/config.schema.yaml")
+
+
+include: "04_Workflow/common.smk"
+
+
+wildcard_constraints:
+    stem=alternatives(FASTQ_STEMS),
+    pair=alternatives(READ_PAIRS),
+    comparison=alternatives(COMPARISONS),
+    column=alternatives(COMPARED_COLUMNS),
+    alpha=alternatives(config["diversity"]["alpha_metrics"]),
+    beta=alternatives(config["diversity"]["beta_metrics"]),
+
+
+include: "04_Workflow/quality.smk"
+include: "04_Workflow/qiime_import.smk"
+include: "04_Workflow/dada2.smk"
+include: "04_Workflow/taxonomy.smk"
+include: "04_Workflow/phylogeny.smk"
+include: "04_Workflow/comparison.smk"
+include: "04_Workflow/diversity.smk"
+include: "04_Workflow/differential_abundance.smk"
+include: "04_Workflow/metaboanalyst.smk"
+include: "04_Workflow/targets.smk"
+
+
+report: "07_Report/workflow.rst"
+
+
+localrules:
+    all,
+    core,
+
+
+# Common part + the comparisons selected by --config run_comparisons=...
+rule all:
+    input:
+        all_targets(),
+    default_target: True
+
+
+# Common part only (quality, denoising, taxonomy, phylogeny)
+rule core:
+    input:
+        core_targets(),
