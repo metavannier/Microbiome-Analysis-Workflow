@@ -105,6 +105,31 @@ rule gen_tax:
         """
 
 
+# Rank held by each taxonomic level (level 7 = genus with SILVA 144
+# uniform classifiers, species with SILVA 138)
+rule taxonomy_ranks:
+    input:
+        taxonomy=f"{TAXDIR}/taxonomy.tsv",
+        script=script("taxonomy_ranks.py"),
+    output:
+        report(
+            f"{TAXDIR}/taxonomy_ranks.tsv",
+            caption=caption("taxonomy_ranks"),
+            category="04 Taxonomy",
+            labels={"result": "taxonomic levels"},
+        ),
+    log:
+        f"{LOGDIR}/04_taxonomy/{PROJ}_taxonomy_ranks.log",
+    conda:
+        QIIME_ENV
+    container:
+        QIIME_CONTAINER
+    shell:
+        """
+        python {input.script} --taxonomy {input.taxonomy} --output {output} > {log} 2>&1
+        """
+
+
 # ASV sequences with their taxonomy
 rule rep_seqs_viz:
     input:

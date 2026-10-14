@@ -47,7 +47,7 @@ Assigning taxonomy
 ==================
 
 We use a machine learning classifier to assign taxonomies to the ASVs with the `classify-sklearn <https://doi.org/10.1186/s40168-018-0470-z>`_ method (confidence {{ snakemake.config["taxonomy"]["confidence"] }}).
-The naive Bayes classifier pre-trained on the `SILVA <https://www.arb-silva.de/>`_ SSU database, V3-V4 region (341f-806r), for QIIME 2 2026.7 is used. ASVs assigned to {{ snakemake.config["taxonomy"]["exclude"] }} are removed.
+The naive Bayes classifier pre-trained on the `SILVA <https://www.arb-silva.de/>`_ SSU database (release 144, uniform weights), V3-V4 region (341f-806r), for QIIME 2 2026.7 is used. Its taxonomy has 7 ranks (domain, kingdom, phylum, class, order, family, genus): level 7 is the genus (see *04 Taxonomy / taxonomy_ranks.tsv*). Classifier file: ``{{ snakemake.config["taxonomy"]["classifier"] }}``. ASVs assigned to {{ snakemake.config["taxonomy"]["exclude"] }} are removed.
 
 Samples with fewer than {{ snakemake.config["diversity"]["samplingdepth"] }} reads (sampling depth) are removed from the taxonomic, diversity and abundance analyses.
 
@@ -71,7 +71,7 @@ For each comparison, the feature table is restricted to the samples of the compa
 Differential abundance
 ======================
 
-- Taxa are collapsed at the level {{ snakemake.config["differential_abundance"]["taxa_level"] }} (species).
+- Taxa are collapsed at the level {{ snakemake.config["differential_abundance"]["taxa_level"] }} (deepest rank of the classifier).
 - We process the frequency filtering by group of samples: one taxon is kept in a group if its frequency is >= {{ snakemake.config["differential_abundance"]["min_frequency"] }} and if it is present in at least {{ snakemake.config["differential_abundance"]["min_samples"] }} samples of the group.
 - `Analysis of Composition of Microbiomes (ANCOM) <https://pubmed.ncbi.nlm.nih.gov/26028277/>`_ identifies the taxa that are differentially abundant between the groups of each compared column.
 - The same filtered table is formatted for `LEfSe <https://doi.org/10.1186/gb-2011-12-6-r60>`_.
@@ -79,4 +79,4 @@ Differential abundance
 MetaboAnalyst tables
 ====================
 
-The species-level (level {{ snakemake.config["metaboanalyst"]["taxa_level"] }}) abundance table of the taxa bar plot (identical to the "Download CSV" of QIIME 2 View) is formatted for `MetaboAnalyst <https://www.metaboanalyst.ca/>`_: samples of the comparison in rows, a Group column (compared column of the sample metadata) and the relative abundance of each taxon.
+The level {{ snakemake.config["metaboanalyst"]["taxa_level"] }} abundance table of the taxa bar plot (identical to the "Download CSV" of QIIME 2 View) is formatted for `MetaboAnalyst <https://www.metaboanalyst.ca/>`_: samples of the comparison in rows, a Group column (compared column of the sample metadata) and the relative abundance of each taxon.

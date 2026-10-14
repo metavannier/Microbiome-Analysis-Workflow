@@ -46,10 +46,10 @@ trimmomatic:
     threads: 4
 
 primer:
-    # primers for 16S "V3-V4" regions (341F / 805R)
+    # primers for 16S "V3-V4" regions (341F / 805R, Klindworth et al. 2013)
     primerF: CCTACGGGNGGCWGCAG
     primerR: GACTACHVGGGTATCTAATCC
-    # Parada et al. 2016 MEP primers for 16S
+    # cutadapt error rate and minimum overlap
     primer_err: 0.1
     primer_overlap: 3
     threads: 4
@@ -75,8 +75,10 @@ dada2:
 taxonomy:
     # Pre-trained naive Bayes classifier for QIIME 2 2026.7 downloaded from
     # https://www.arb-silva.de/current-release/QIIME2/2026.7/SSU/V3V4-341f-806r/uniform
-    # Put the .qza in 01_Reference/ and write its exact file name here.
-    classifier: "01_Reference/silva-V3V4-341f-806r-uniform-classifier.qza"
+    # (SILVA 144). Put the .qza in 01_Reference/ and check the file name.
+    # SILVA 144 taxonomy has 7 ranks: domain, kingdom, phylum, class, order,
+    # family, genus (the uniform classifiers do not include species).
+    classifier: "01_Reference/SILVA_144_SSURef_NR99_uniform_classifier_V3V4-341f-806r.qza"
     confidence: 0.7
     njobs: 4 # Be careful with the memory usage
     # Taxa removed from the feature table (comma-separated, case-insensitive)
@@ -110,7 +112,9 @@ diversity:
 
 # Differential abundance (each comparison)
 differential_abundance:
-    # taxonomic level of the collapsed table (7 = species)
+    # taxonomic level of the collapsed table: 7 = deepest rank of the
+    # classifier (genus with SILVA 144 uniform, species with SILVA 138);
+    # see 05_Output/04_taxonomy/taxonomy_ranks.tsv
     taxa_level: 7
     # frequency filtering by group of samples ('filter_column' of
     # comparisons.tsv): a taxon is kept in a group if its frequency is
@@ -120,7 +124,9 @@ differential_abundance:
 
 # Taxon abundance tables for MetaboAnalyst (each comparison)
 metaboanalyst:
-    # level-N.csv of the taxa bar plot (7 = species)
+    # level-N.csv of the taxa bar plot: 7 = deepest rank of the classifier
+    # (genus with SILVA 144 uniform, species with SILVA 138); check the rank
+    # of each level in 05_Output/04_taxonomy/taxonomy_ranks.tsv
     taxa_level: 7
     # relative abundance (proportion of the reads of the sample) or counts
     relative_abundance: true

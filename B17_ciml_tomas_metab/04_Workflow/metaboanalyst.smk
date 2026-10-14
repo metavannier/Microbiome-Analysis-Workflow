@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------
-# Species-level (level 7) taxon abundance tables for MetaboAnalyst
+# Level 7 (deepest rank) taxon abundance tables for MetaboAnalyst
 # ----------------------------------------------------------------------
 # Source: the level-N.csv of the project taxa bar plot, i.e. the file of
 # "Download CSV" in QIIME 2 View (rule barplot_csv). For each compared

@@ -1,6 +1,6 @@
 # ----------------------------------------------------------------------
 # Differential abundance of each comparison (taxa collapsed at
-# config[differential_abundance][taxa_level], species level by default)
+# config[differential_abundance][taxa_level], deepest rank by default)
 # ----------------------------------------------------------------------
 
 DADIR = f"{COMPDIR}/02_differential_abundance"

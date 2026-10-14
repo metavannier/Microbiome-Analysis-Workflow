@@ -13,8 +13,9 @@ filtering per group, ANCOM, LEfSe table) and adds:
 
 - comparisons defined in a table (`comparisons.tsv`), each analysed on its own
   subset of samples and producing its own report;
-- the species-level (level 7) taxon abundance tables formatted for
-  **MetaboAnalyst**, generated automatically for every comparison;
+- the level-7 taxon abundance tables (taxa bar plot "Download CSV" at
+  level 7) formatted for **MetaboAnalyst**, generated automatically for every
+  comparison;
 - containers / conda environments for every step, a single launcher
   (`run_workflow.sh`), configuration and sample-sheet validation.
 
@@ -78,11 +79,15 @@ Snakemake container, and every step runs in its own software environment.
 
 3. **References** (`01_Reference/`, see its README):
    - the SILVA classifier for QIIME 2 **2026.7** downloaded from
-     <https://www.arb-silva.de/current-release/QIIME2/2026.7/SSU/V3V4-341f-806r/uniform>:
-     copy the `.qza` and write its **exact file name** in `config.yaml`
-     (`taxonomy: classifier`). A classifier only works with the scikit-learn
-     version it was trained with (1.7.1 for QIIME 2 2026.4/2026.7); check with
-     `unzip -p 01_Reference/<classifier>.qza '*/data/sklearn_version.json'`;
+     <https://www.arb-silva.de/current-release/QIIME2/2026.7/SSU/V3V4-341f-806r/uniform>,
+     expected as `01_Reference/SILVA_144_SSURef_NR99_uniform_classifier_V3V4-341f-806r.qza`
+     (`taxonomy: classifier` in `config.yaml`; adapt it if your file name
+     differs). A classifier only works with the scikit-learn version it was
+     trained with (1.7.1 for QIIME 2 2026.4/2026.7); check with
+     `unzip -p 01_Reference/<classifier>.qza '*/data/sklearn_version.json'`.
+     The SILVA site is a JavaScript browser: download with `wget` from
+     `https://www.arb-silva.de/fileadmin/silva_databases/current/QIIME2/2026.7/SSU/V3V4-341f-806r/uniform/<file>`
+     and keep the `.md5`/`.doi` files next to it;
    - `sepp-refs-silva-128.qza` for the SEPP phylogeny (`phylogeny: seppdb`).
 
 4. **Parameters** — check `config.yaml`, in particular the DADA2 truncation
@@ -201,13 +206,27 @@ For every comparison and compared column:
   PERMANOVA (global + pairwise) on Jaccard / Bray-Curtis / unweighted and
   weighted UniFrac, PCoA (Emperor);
 - **differential abundance** (`02_differential_abundance/`): taxa collapsed at
-  the species level, frequency filtering by group, ANCOM, LEfSe input table;
-- **MetaboAnalyst** (`03_metaboanalyst/`): species-level abundance table.
+  level 7, frequency filtering by group, ANCOM, LEfSe input table;
+- **MetaboAnalyst** (`03_metaboanalyst/`): level-7 abundance table.
 
 Results are in `05_Output/06_comparisons/<comparison>/`; the files of the
 common part in `05_Output/00_*` to `05_Output/05_phylogeny`.
 
-## 6. Species-level tables for MetaboAnalyst
+## 6. Level-7 tables for MetaboAnalyst
+
+> **Level 7 is the genus with the SILVA 144 classifiers.** The SILVA
+> classifiers published for QIIME 2 2026.7 (SILVA release 144) have 7 ranks:
+> domain, **kingdom** (new rank), phylum, class, order, family, genus — and
+> SILVA states that the *uniform* classifiers do not include species. With
+> the previous SILVA 138 classifier (your former `level-7.csv`,
+> `d__;p__;c__;o__;f__;g__;s__`), level 7 was the species. The workflow
+> writes `05_Output/04_taxonomy/taxonomy_ranks.tsv` (also in the report) with
+> the rank of each level for your classifier. The level is set in
+> `config.yaml` (`metaboanalyst: taxa_level`, `differential_abundance:
+> taxa_level`); a species level needs a classifier that includes species
+> (e.g. a SILVA 144 *weighted* classifier, which is habitat-specific, or a
+> classifier trained with species labels for scikit-learn 1.7.1); check its
+> levels in `taxonomy_ranks.tsv` and set `taxa_level` accordingly.
 
 For each comparison and compared column, the workflow writes
 `05_Output/06_comparisons/<ID>/03_metaboanalyst/undernutrition-<ID>-level-7-<column>-metaboanalyst.csv`:
@@ -261,7 +280,8 @@ cutadapt (same primers and options), DADA2 (same truncation, trimming,
 expected errors, training reads), length filter ≥ 400 nt, naive Bayes
 classifier (confidence 0.7), exclusion of `d__Eukaryota`, removal of the
 samples below the sampling depth, SEPP tree, core metrics, alpha/beta group
-significance, collapse at level 7, frequency filtering by group
+significance, collapse at level 7 (the deepest rank: genus with SILVA 144,
+species with SILVA 138), frequency filtering by group
 (≥ 50 reads in ≥ 2 samples), pseudocount + ANCOM, LEfSe table.
 
 Changes required by the current software:

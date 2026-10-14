@@ -19,6 +19,7 @@ def core_targets():
         f"{TAXDIR}/{PROJ}-rep-filtered-seqs-taxa-{GROUP}.qzv",
         f"{TAXDIR}/{PROJ}-taxa-table-filtered-{GROUP}.qzv",
         f"{TAXDIR}/taxonomy_filtered.tsv",
+        f"{TAXDIR}/taxonomy_ranks.tsv",
         f"{TAXDIR}/{PROJ}-asv-table-with-taxonomy.tsv",
         f"{TAXDIR}/{PROJ}-taxa-bar-plots.qzv",
         f"{TAXDIR}/{PROJ}-level-{MA_LEVEL}.csv",
@@ -48,7 +49,7 @@ def comparison_targets(cid):
                 column=columns, allow_missing=True),
         *expand(f"{DADIR}/{DA_PREFIX}-lefse-{{column}}.tsv",
                 column=columns, allow_missing=True),
-        # MetaboAnalyst (species level)
+        # MetaboAnalyst (level 7 by default)
         *expand(f"{MADIR}/{COMP_PREFIX}-level-{MA_LEVEL}-{{column}}-metaboanalyst.csv",
                 column=columns, allow_missing=True),
     ]
