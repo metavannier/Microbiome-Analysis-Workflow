@@ -1,0 +1,2 @@
+Reads per sample of the feature table used by every diversity analysis of the comparisons (rarefaction curves, rarefaction at the sampling depth, alpha and beta diversity). With the SEPP phylogeny, the ASVs that could not be inserted in the reference tree are not in this table. Choose the sampling depth (config.yaml, diversity: samplingdepth) with the "Interactive Sample Detail" tab of this file.
+Download, drag and drop the file on `QIIME 2 View <https://view.qiime2.org/>`_

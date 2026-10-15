@@ -1,8 +1,12 @@
-# Data, references and results (not versioned)
+# Data, references and results (not versioned); the folders themselves are
+# re-included for their README (a parent .gitignore may exclude them)
+!00_RowData/
 00_RowData/*
 !00_RowData/README.md
+!01_Reference/
 01_Reference/*
 !01_Reference/README.md
+*.sif
 05_Output/
 08_Log/
 reports/

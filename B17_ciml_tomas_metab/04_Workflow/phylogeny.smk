@@ -4,9 +4,11 @@
 # ----------------------------------------------------------------------
 
 PHYLO = config["phylogeny"]["method"]
-TREE = f"{PHYLODIR}/{PROJ}-rooted-tree.qza"
-# Feature table used for the diversity analyses: only the ASVs in the tree
-DIVERSITY_TABLE = f"{PHYLODIR}/{PROJ}-taxa-table-filtered-tree-{GROUP}.qza"
+# The method is in the file names: changing it builds a new tree and reruns
+# the diversity analyses
+TREE = f"{PHYLODIR}/{PROJ}-rooted-tree-{PHYLO}.qza"
+# Feature table used for ALL the diversity analyses: only the ASVs in the tree
+DIVERSITY_TABLE = f"{PHYLODIR}/{PROJ}-taxa-table-filtered-tree-{PHYLO}-{GROUP}.qza"
 
 
 if PHYLO == "sepp":
@@ -112,3 +114,37 @@ elif PHYLO == "fasttree":
 else:
     raise WorkflowError(
         f"phylogeny: method must be 'sepp' or 'fasttree', not '{PHYLO}'")
+
+
+# Reads per sample of the table rarefied by the diversity analyses: choose
+# diversity:samplingdepth on this table (with SEPP, ASVs that could not be
+# inserted in the tree are not counted)
+rule diversity_table_summary:
+    input:
+        table=DIVERSITY_TABLE,
+        metadata=METADATA_FILE,
+    output:
+        summary=report(
+            f"{PHYLODIR}/{PROJ}-taxa-table-filtered-tree-{PHYLO}-{GROUP}.qzv",
+            caption=caption("diversitytable"),
+            category="04 Taxonomy",
+            labels={"result": "feature table summary (ASVs in the tree)"},
+        ),
+        feature_frequencies=f"{PHYLODIR}/{PROJ}-taxa-table-filtered-tree-{PHYLO}-{GROUP}-feature-frequencies.qza",
+        sample_frequencies=f"{PHYLODIR}/{PROJ}-taxa-table-filtered-tree-{PHYLO}-{GROUP}-sample-frequencies.qza",
+    log:
+        f"{LOGDIR}/05_phylogeny/{PROJ}_diversity_table_summary.log",
+    conda:
+        QIIME_ENV
+    container:
+        QIIME_CONTAINER
+    shell:
+        """
+        qiime feature-table summarize \
+            --i-table {input.table} \
+            --m-metadata-file {input.metadata} \
+            --o-feature-frequencies {output.feature_frequencies} \
+            --o-sample-frequencies {output.sample_frequencies} \
+            --o-summary {output.summary} \
+            --no-recycle > {log} 2>&1
+        """

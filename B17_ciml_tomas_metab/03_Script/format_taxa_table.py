@@ -122,9 +122,18 @@ def read_groups_from(path):
         sample = fh.read(4096)
     dialect = csv.Sniffer().sniff(sample, delimiters=",;\t")
     old = pd.read_csv(path, sep=dialect.delimiter, dtype=str,
-                      usecols=[0, 1], encoding="utf-8-sig")
+                      usecols=[0, 1], encoding="utf-8-sig",
+                      keep_default_na=False)
     old.columns = ["Sample", "Group"]
-    return old.set_index("Sample")["Group"].str.strip()
+    old = old.apply(lambda col: col.str.strip())
+    if old["Sample"].duplicated().any():
+        sys.exit(f"ERROR: duplicated samples in {path}: "
+                 + ", ".join(old["Sample"][old["Sample"].duplicated()]))
+    empty = old["Group"] == ""
+    if empty.any():
+        print("WARNING: no group in " + path + " for samples (dropped): "
+              + ", ".join(old["Sample"][empty]), file=sys.stderr)
+    return old[~empty].set_index("Sample")["Group"]
 
 
 def read_sample_list(path):
@@ -137,18 +146,28 @@ def read_sample_list(path):
 
 
 def taxa_columns(table, metadata_cols):
-    """Taxa columns of a barplot CSV = numeric columns that are not
-    metadata columns (QIIME 2 appends the metadata after the taxa)."""
-    cols = []
+    """Taxa columns of a barplot CSV (QIIME 2 appends the metadata columns
+    after the taxa). At level N every taxon has exactly N ranks, so the
+    taxa are the numeric columns, not in the metadata, with the same
+    number of ';' as the first taxon column."""
+    first = table.columns[0]
+    n_sep = first.count(";")
+    cols, skipped = [], []
     for col in table.columns:
         if col in metadata_cols:
             continue
+        if col.count(";") != n_sep or (
+                n_sep == 0 and not col.startswith(("Unassigned", "d__", "k__"))):
+            skipped.append(col)
+            continue
         values = pd.to_numeric(table[col], errors="coerce")
-        if values.notna().all():
-            cols.append(col)
-        elif ";" in col or col.startswith(("Unassigned", "d__", "k__")):
+        if not values.notna().all():
             sys.exit(f"ERROR: taxon column '{col}' contains non-numeric "
                      "values")
+        cols.append(col)
+    if skipped:
+        print("Metadata columns of the taxa table (not taxa): "
+              + ", ".join(skipped))
     return cols
 
 

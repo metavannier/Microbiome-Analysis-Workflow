@@ -23,8 +23,8 @@ def core_targets():
         f"{TAXDIR}/{PROJ}-asv-table-with-taxonomy.tsv",
         f"{TAXDIR}/{PROJ}-taxa-bar-plots.qzv",
         f"{TAXDIR}/{PROJ}-level-{MA_LEVEL}.csv",
-        # Phylogeny
-        DIVERSITY_TABLE,
+        # Phylogeny: table of the diversity analyses
+        f"{PHYLODIR}/{PROJ}-taxa-table-filtered-tree-{PHYLO}-{GROUP}.qzv",
     ]
 
 

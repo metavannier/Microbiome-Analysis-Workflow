@@ -47,9 +47,9 @@ Assigning taxonomy
 ==================
 
 We use a machine learning classifier to assign taxonomies to the ASVs with the `classify-sklearn <https://doi.org/10.1186/s40168-018-0470-z>`_ method (confidence {{ snakemake.config["taxonomy"]["confidence"] }}).
-The naive Bayes classifier pre-trained on the `SILVA <https://www.arb-silva.de/>`_ SSU database (release 144, uniform weights), V3-V4 region (341f-806r), for QIIME 2 2026.7 is used. Its taxonomy has 7 ranks (domain, kingdom, phylum, class, order, family, genus): level 7 is the genus (see *04 Taxonomy / taxonomy_ranks.tsv*). Classifier file: ``{{ snakemake.config["taxonomy"]["classifier"] }}``. ASVs assigned to {{ snakemake.config["taxonomy"]["exclude"] }} are removed.
+A naive Bayes classifier pre-trained on the `SILVA <https://www.arb-silva.de/>`_ SSU database for QIIME 2 2026.7 is used (file ``{{ snakemake.config["taxonomy"]["classifier"] }}``). The rank held by each taxonomic level is listed in *04 Taxonomy / taxonomy_ranks.tsv*: with the default SILVA 144 uniform classifier (V3-V4, 341f-806r), the 7 ranks are domain, kingdom, phylum, class, order, family and genus (level 7 = genus). ASVs assigned to {{ snakemake.config["taxonomy"]["exclude"] }} are removed.
 
-Samples with fewer than {{ snakemake.config["diversity"]["samplingdepth"] }} reads (sampling depth) are removed from the taxonomic, diversity and abundance analyses.
+Samples with fewer than {{ snakemake.config["diversity"]["samplingdepth"] }} reads (sampling depth) are removed from the taxonomic tables, the differential abundance and MetaboAnalyst tables, and from the rarefied diversity metrics (core metrics); the rarefaction curves and the feature table summaries show every sample.
 
 Phylogeny
 =========
@@ -79,4 +79,5 @@ Differential abundance
 MetaboAnalyst tables
 ====================
 
-The level {{ snakemake.config["metaboanalyst"]["taxa_level"] }} abundance table of the taxa bar plot (identical to the "Download CSV" of QIIME 2 View) is formatted for `MetaboAnalyst <https://www.metaboanalyst.ca/>`_: samples of the comparison in rows, a Group column (compared column of the sample metadata) and the relative abundance of each taxon.
+{% set ma = snakemake.config["metaboanalyst"] %}
+The level {{ snakemake.config["metaboanalyst"]["taxa_level"] }} abundance table of the taxa bar plot (identical to the "Download CSV" of QIIME 2 View) is formatted for `MetaboAnalyst <https://www.metaboanalyst.ca/>`_: samples of the comparison in rows, a Group column (compared column of the sample metadata) and {% if ma["relative_abundance"] %}the relative abundance of each taxon in the sample (proportion of the reads of the sample over all taxa){% else %}the read counts of each taxon{% endif %}.{% if ma["drop_zero_taxa"] %} Taxa absent from all the samples of the comparison are removed.{% endif %}{% if ma["min_group_prevalence"] > 0 %} Only the taxa present in at least {{ ma["min_group_prevalence"] }} samples of at least one group are kept.{% endif %}

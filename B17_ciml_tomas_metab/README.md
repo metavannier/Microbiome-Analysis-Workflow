@@ -42,18 +42,32 @@ filtering per group, ANCOM, LEfSe table) and adds:
 | `08_Log/` | logs of every step (created by the workflow) |
 | `profiles/default/` | default Snakemake options of this workflow |
 | `reports/` | the reports, one per comparison (created by `run_workflow.sh`) |
+| `.snakemake/` | Snakemake metadata, conda environments (`conda/`) and their package cache (`conda-pkgs/`) |
 
 ## 2. Requirements
 
 - **Apptainer 1.4.4** on the server, with Internet access to pull
-  `docker://snakemake/snakemake:v9.27.0` and either the conda channels
-  (default mode) or the container registries (`--sdm apptainer` mode).
-- Disk: ~5 GB for the QIIME 2 environment/image, plus the results.
-  QIIME 2 writes large temporary files: set `tmpdir:` in `config.yaml` to a
-  large directory if `/tmp` is small.
+  `docker://snakemake/snakemake:v9.27.0` (once, into
+  `02_Container/snakemake_v9.27.0.sif`) and either the conda channels
+  (default `SDM=conda`) or the container registries (`SDM=apptainer`).
+- Disk, in the project directory:
+  - `SDM=conda`: ~10 GB for the conda environments (`.snakemake/conda`,
+    QIIME 2 2026.7 ≈ 6 GB) and their package cache (`.snakemake/conda-pkgs`,
+    mostly hard links; set by the Snakefile so that nothing goes to
+    `~/.conda/pkgs`);
+  - `SDM=apptainer`: the images (QIIME 2 ≈ 3-5 GB); converting the QIIME 2
+    image needs ~6 GB of temporary space in `APPTAINER_TMPDIR` (default
+    `$TMPDIR` or `/tmp`) and the layers are cached in `APPTAINER_CACHEDIR`
+    (default `~/.apptainer/cache`). If `/tmp` or the home quota is small:
+    `export APPTAINER_TMPDIR=/big/disk/apptainer-tmp APPTAINER_CACHEDIR=/big/disk/apptainer-cache`
+    (`run_workflow.sh` creates, binds and forwards them);
+  - plus the results; QIIME 2 also writes large temporary files: set
+    `tmpdir:` in `config.yaml` to a large directory if `/tmp` is small.
 
 Nothing else has to be installed: Snakemake itself runs in the official
-Snakemake container, and every step runs in its own software environment.
+Snakemake container, and every step runs in its own software environment
+(`./run_workflow.sh manifest` uses `python3` of the server if there is one,
+otherwise the Python of the Snakemake container).
 
 ## 3. Set up the analysis
 
@@ -108,41 +122,61 @@ CORES=16 ./run_workflow.sh all                           # every comparison + on
 Recommended order:
 
 1. `./run_workflow.sh core` runs the common part once (quality control,
-   primer removal, DADA2, taxonomy, phylogeny). Look at
-   `05_Output/02_qiime_import/undernutrition-PE-demux-noprimer.qzv` (read
-   quality → DADA2 truncation lengths) and
-   `05_Output/04_taxonomy/undernutrition-taxa-table-filtered-dada2.qzv`
-   (reads per sample → `diversity: samplingdepth` and `maxdepth`), on
-   <https://view.qiime2.org>. If you change the DADA2 parameters, rerun `core`.
+   primer removal, DADA2, taxonomy, phylogeny). Look, on
+   <https://view.qiime2.org>, at
+   - `05_Output/02_qiime_import/undernutrition-PE-demux-noprimer.qzv` (read
+     quality → DADA2 truncation lengths; if you change them, rerun `core`);
+   - `05_Output/05_phylogeny/undernutrition-taxa-table-filtered-tree-sepp-dada2.qzv`
+     (reads per sample of the table rarefied by the diversity analyses, i.e.
+     without the ASVs SEPP could not insert → `diversity: samplingdepth` and
+     `maxdepth`); `05_Output/04_taxonomy/undernutrition-taxa-table-filtered-dada2.qzv`
+     is the same table with every ASV (used for the taxonomy, differential
+     abundance and MetaboAnalyst tables, also filtered at `samplingdepth`).
 2. Run the comparisons (`run <ID>` or `all`). The common part is reused; only
    the comparison is computed. Each comparison gets its own report
    `reports/undernutrition_<ID>_report.zip` (unzip it and open
-   `report.html`; set `REPORT_FORMAT=html` for a single HTML file).
+   `report.html`; set `REPORT_FORMAT=html` for a single HTML file). If a
+   comparison fails, the reports of the other ones are still written and the
+   failed ones are listed.
 
 Snakemake only reruns what is needed: after a change of a parameter in
-`config.yaml`, the steps using it (and the following ones) are rerun.
+`config.yaml`, the steps using it (and the following ones) are rerun
+(`./run_workflow.sh dryrun <ID>` shows them). `./run_workflow.sh report <ID>`
+refuses to build a report over results that are not up to date with
+`config.yaml` (the report text describes the current parameters); run
+`./run_workflow.sh run <ID>` instead, or force it with `FORCE_REPORT=1`.
+
+Keep the same software deployment (`SDM`) for a project: switching between
+`conda` and `apptainer` changes the software environment of every step, and
+Snakemake then recomputes everything (to avoid it after checking the
+dry-run, add `--rerun-triggers mtime params input code`).
 
 ### Options of `run_workflow.sh` (environment variables)
 
 | Variable | Default | |
 |---|---|---|
 | `CORES` | 8 | cores used by Snakemake |
-| `SDM` | `conda` | `conda`: each step in a conda environment created by Snakemake (in `.snakemake/conda`, once); `apptainer`: each step in its container (needs Snakemake on the server, see below); `none`: tools already installed |
-| `SNAKEMAKE_IMAGE` | `docker://snakemake/snakemake:v9.27.0` | Snakemake container |
+| `SDM` | `conda` | `conda`: each step in a conda environment created by Snakemake (in `.snakemake/conda`, once); `apptainer`: each step in its official container (see *Software environments*); `none`: tools already installed (only with `SNAKEMAKE=...`) |
+| `SNAKEMAKE_IMAGE` | `docker://snakemake/snakemake:v9.27.0` | Snakemake container, pulled once into `02_Container/snakemake_<tag>.sif` (or the path of a local `.sif`) |
 | `SNAKEMAKE` | — | use this Snakemake instead of the container (e.g. `SNAKEMAKE=snakemake`) |
 | `REPORT_FORMAT` | `zip` | `zip` or `html` |
-| `BINDS` | — | directories outside the project to make visible in Apptainer (comma-separated), e.g. the target of symbolic links in `00_RowData`/`01_Reference`, or `tmpdir` |
+| `BINDS` | — | directories outside the project to make visible in Apptainer (comma-separated), e.g. the target of symbolic links in `00_RowData`/`01_Reference` (`tmpdir`, `APPTAINER_TMPDIR` and `APPTAINER_CACHEDIR` are added automatically) |
+| `FORCE_REPORT` | — | `1`: build the report even if the results are not up to date |
 
 Any other Snakemake option can be added at the end, e.g.
-`./run_workflow.sh run L2_Ileal_CTL_vs_SAM --forcerun core_metrics`.
+`./run_workflow.sh run L2_Ileal_CTL_vs_SAM --forcerun core_metrics`
+(`--config KEY=VALUE` given there is merged with the comparison selection).
 
 ### Equivalent Snakemake commands
 
 ```bash
+apptainer pull 02_Container/snakemake_v9.27.0.sif docker://snakemake/snakemake:v9.27.0   # once
+mkdir -p reports
+
 # Snakemake 9 in its container, each step in a conda environment (default)
-apptainer exec --bind "$PWD" docker://snakemake/snakemake:v9.27.0 \
+apptainer exec --bind "$PWD" 02_Container/snakemake_v9.27.0.sif \
     snakemake --cores 16 --sdm conda --config run_comparisons=L1_Feces_Female_CTL_vs_SAM
-apptainer exec --bind "$PWD" docker://snakemake/snakemake:v9.27.0 \
+apptainer exec --bind "$PWD" 02_Container/snakemake_v9.27.0.sif \
     snakemake --cores 1 --config run_comparisons=L1_Feces_Female_CTL_vs_SAM \
     --report reports/undernutrition_L1_Feces_Female_CTL_vs_SAM_report.zip
 
@@ -152,7 +186,11 @@ snakemake --cores 16 --sdm apptainer --apptainer-args "--bind $PWD" \
 ```
 
 `--config run_comparisons=` takes a comparison ID, several IDs separated by
-commas, `all` (default) or `none` (common part only).
+commas, `all` (default) or `none` (common part only); a plain
+`snakemake --cores N --sdm conda` therefore runs every comparison. The
+Snakefile sets flexible conda channel priority, which the QIIME 2
+environment needs: ignore the Snakemake warning recommending strict channel
+priorities and do not set `channel_priority: strict` for this project.
 
 ### Software environments
 
@@ -166,12 +204,21 @@ container (`config.yaml`, `containers:`):
 | Trimmomatic | `trimmomatic=0.40` | `docker://staphb/trimmomatic:0.40` |
 | MultiQC | `multiqc=1.35` | `docker://multiqc/multiqc:v1.35` |
 
-When Snakemake itself runs inside the Snakemake container (default of
-`run_workflow.sh`), use `SDM=conda`: running the step containers would need
-Apptainer inside Apptainer. With Snakemake installed on the server
-(`pip install snakemake` or `conda create -n snakemake -c conda-forge -c bioconda snakemake`),
-`SNAKEMAKE=snakemake SDM=apptainer ./run_workflow.sh ...` uses the official
-images instead (pulled once in `.snakemake/singularity`).
+`SDM=conda` (default) is the safest when Snakemake runs in its container:
+the environments are created once by conda inside the project.
+
+`SDM=apptainer` runs every step in the official images (no environment to
+build). From the Snakemake container it uses nested Apptainer (the image
+contains Apptainer), which works when the server allows unprivileged user
+namespaces and `/dev/fuse`; test it with
+`apptainer exec docker://snakemake/snakemake:v9.27.0 apptainer exec docker://alpine:3.20 true`.
+If this fails, use `SDM=conda`, or Snakemake installed on the server
+(`conda create -n snakemake -c conda-forge -c bioconda snakemake=9.27.0`, or
+`pip install "snakemake[reports]==9.27.0" pandas` — the workflow needs pandas
+and the reports need pygments) with
+`SNAKEMAKE=snakemake SDM=apptainer ./run_workflow.sh ...`. The step images
+are pulled once (in `.snakemake/singularity`, or in `APPTAINER_CACHEDIR`
+when it is set).
 
 Since release 2026.4, the QIIME 2 "amplicon" distribution is called
 **qiime2** (framework *rachis*): image `quay.io/qiime2/qiime2:2026.7`, conda
@@ -210,7 +257,10 @@ For every comparison and compared column:
 - **MetaboAnalyst** (`03_metaboanalyst/`): level-7 abundance table.
 
 Results are in `05_Output/06_comparisons/<comparison>/`; the files of the
-common part in `05_Output/00_*` to `05_Output/05_phylogeny`.
+common part in `05_Output/00_*` to `05_Output/05_phylogeny`. The tree and
+the table of the diversity analyses are named after the phylogeny method
+(`...-rooted-tree-sepp.qza`): changing `phylogeny: method` builds a new tree
+and reruns the diversity analyses.
 
 ## 6. Level-7 tables for MetaboAnalyst
 
@@ -243,8 +293,10 @@ M6995,CTL,0,0,...
   metadata column in `sample-metadata.tsv` (it replaces the second column of
   the former "Ileum-cleaned-F vs M.csv");
 - values = relative abundance of each taxon in the sample (counts divided by
-  the total of the sample over all taxa), as in the previous tables;
-- taxa absent from all the samples of the comparison are removed;
+  the total of the sample over all taxa), as in the previous tables
+  (default; `relative_abundance: false` gives the read counts);
+- taxa absent from all the samples of the comparison are removed (default;
+  `drop_zero_taxa: false` keeps them);
 - comma-separated with `.` decimals (format read by MetaboAnalyst,
   *Statistical Analysis [one factor]*, samples in rows, unpaired).
 
@@ -271,6 +323,10 @@ python3 03_Script/format_taxa_table.py --taxa-csv level-7.csv \
     --groups-from "Ileum-cleaned-F vs M.csv" --output Ileal-level-7.csv
 ```
 
+The taxa columns are recognised by their structure (same number of ranks as
+the first taxon), so the metadata columns appended by QIIME 2 at the end of
+`level-N.csv`, numeric or not, are never taken as taxa.
+
 (`python3 03_Script/format_taxa_table.py --help` for all the options.)
 
 ## 7. Changes compared with the previous workflow
@@ -278,26 +334,41 @@ python3 03_Script/format_taxa_table.py --taxa-csv level-7.csv \
 Methodology kept: Trimmomatic (`LEADING:2 TRAILING:2 SLIDINGWINDOW:4:2 MINLEN:25`),
 cutadapt (same primers and options), DADA2 (same truncation, trimming,
 expected errors, training reads), length filter ≥ 400 nt, naive Bayes
-classifier (confidence 0.7), exclusion of `d__Eukaryota`, removal of the
+classification (confidence 0.7), exclusion of `d__Eukaryota`, removal of the
 samples below the sampling depth, SEPP tree, core metrics, alpha/beta group
-significance, collapse at level 7 (the deepest rank: genus with SILVA 144,
-species with SILVA 138), frequency filtering by group
+significance, collapse at level 7, frequency filtering by group
 (≥ 50 reads in ≥ 2 samples), pseudocount + ANCOM, LEfSe table.
 
-Changes required by the current software:
+Changes required by the current software or by the new data:
 
 - **DADA2 chimera removal: `consensus`** (DADA2 and QIIME 2 default) instead
   of `pooled`. The `pooled` option was removed from QIIME 2 in release 2025.4
   ([q2-dada2 #171](https://github.com/qiime2/q2-dada2/pull/171)); it is not
   accepted by any release that can use the 2026.7 SILVA classifier.
+- **Classifier**: SILVA 138 99 % full-length naive Bayes classifier →
+  SILVA 144 NR99 uniform classifier trained on the V3-V4 region (341f-806r)
+  for QIIME 2 2026.7 (scikit-learn 1.7.1). Same confidence (0.7), but a new
+  database release and region-specific training change the assignments, and
+  the 7 ranks now include the kingdom: level 7 is the genus (see §6). Keep it
+  in mind when comparing with earlier projects.
 - QIIME 2 2026.7 commands: new required outputs (cutadapt statistics, DADA2
   base-transition statistics, feature-table summarize frequencies), shown in
   the reports.
-- Alpha rarefaction: the maximum depth is lowered to the largest sample of a
-  comparison when `maxdepth` is higher (QIIME 2 refuses it otherwise).
-- SEPP: ASVs that cannot be inserted in the reference tree are removed before
-  the phylogenetic metrics (`fragment-insertion filter-features`); UniFrac and
-  Faith PD fail otherwise.
+- **SEPP**: the ASVs that cannot be inserted in the reference tree are removed
+  (`fragment-insertion filter-features`) from the table used for **all** the
+  diversity analyses (rarefaction curves, rarefaction at `samplingdepth`,
+  every alpha and beta metric, also Shannon, observed features, evenness,
+  Jaccard and Bray-Curtis): UniFrac and Faith PD fail otherwise, and
+  core-metrics rarefies the table once for all the metrics. Taxa bar plots,
+  ASV table, ANCOM, LEfSe and MetaboAnalyst tables keep every ASV. The removed
+  ASVs are in `05_Output/05_phylogeny/undernutrition-table-not-in-tree-dada2.qza`.
+  A sample just above `samplingdepth` in the taxonomy table can therefore fall
+  below it in the diversity table: choose the depth with
+  `undernutrition-taxa-table-filtered-tree-sepp-dada2.qzv` (§4).
+- Alpha rarefaction: as each comparison is a subset of the samples, the
+  maximum depth is lowered to the largest sample of the comparison when
+  `maxdepth` is higher (QIIME 2, old and new, refuses a maximum depth above
+  the largest sample).
 - Core metrics use a fixed random seed for the rarefaction
   (`diversity: random_seed`, `null` = random as before).
 - Tool versions: FastQC 0.12.1, Trimmomatic 0.40, MultiQC 1.35 (snakemake
@@ -306,23 +377,50 @@ Changes required by the current software:
 Not carried over (not applicable to this design): longitudinal analyses,
 alpha correlation and PCoA with a "days" axis (the metadata has no numeric
 or time column); OTU clustering and Deblur alternatives (only DADA2 was
-supported). The LEfSe formatting was ported from R to Python (same table;
-the class row is named after the compared column instead of `day`). The
-merge of the frequency-filtered tables, which listed the weaning files by
-hand, now uses the groups of each comparison.
+supported); the relative-frequency table and the visualization of the
+collapsed table before filtering (only used by those analyses).
+
+Other minor differences:
+
+- the LEfSe formatting was ported from R to Python (same table; the class
+  row is named after the compared column instead of `day`);
+- the merge of the frequency-filtered tables, which listed the weaning files
+  by hand, now uses the groups of each comparison;
+- samples are selected per comparison (and `exclude_samples` applied)
+  *before* the frequency filtering by group, whereas the previous sample
+  filter (`RMSAMPLE`) came after the merge;
+- PERMANOVA is run on the compared columns of each comparison (the previous
+  `conditions.tsv` targets were not used);
+- the alpha rarefaction curves include Faith PD (the tree is given);
+- added: summary of the imported reads before primer removal, cutadapt and
+  DADA2 error-model visualizations, taxonomy in the ASV sequence table,
+  per-comparison taxa bar plots, `taxonomy_ranks.tsv`, summary of the
+  diversity table;
+- `taxonomy_filtered.tsv` excludes the taxa case-insensitively, like
+  `qiime taxa filter-table`;
+- `maxdepth` guidance: about the median (not the mean) frequency per sample.
 
 ## 8. Troubleshooting
 
 - **`No space left on device` in a QIIME 2 step**: set `tmpdir:` in
-  `config.yaml` to a large directory (and `BINDS=<that directory>`).
+  `config.yaml` to a large directory (`run_workflow.sh` binds it).
+- **`no space left on device` / `packer failed to pack` while pulling an
+  image** (`SDM=apptainer`): set `APPTAINER_TMPDIR` and `APPTAINER_CACHEDIR`
+  to a large directory (§2); `tmpdir:` does not apply to image pulls.
+- **Disk quota exceeded in `$HOME`**: the conda package cache is
+  `.snakemake/conda-pkgs` (set by the Snakefile unless `CONDA_PKGS_DIRS` is
+  set); for Apptainer, set `APPTAINER_CACHEDIR` outside `$HOME`.
 - **Classifier error "scikit-learn version ... does not match"**: the
   classifier was not trained for QIIME 2 2026.7 (see §3).
 - **Files not found inside the containers** (symbolic links, data elsewhere):
   `BINDS=/path/to/data,/path/to/references ./run_workflow.sh ...`.
 - **Interrupted run**: `./run_workflow.sh unlock`, then run again (incomplete
   files are recomputed).
-- **conda environment creation fails**: the QIIME 2 environment needs flexible
-  channel priority (`run_workflow.sh` sets `CONDA_CHANNEL_PRIORITY=flexible`).
+- **conda environment creation fails to solve**: the QIIME 2 environment
+  needs flexible channel priority; the Snakefile sets
+  `CONDA_CHANNEL_PRIORITY=flexible` (do not override it).
+- **Nested Apptainer fails** (`SDM=apptainer` from the Snakemake container):
+  use `SDM=conda`, or Snakemake installed on the server (§4).
 - **`apptainer pull` of `quay.io/qiime2/qiime2:2026.7` fails**: check the
   available tags on <https://quay.io/repository/qiime2/qiime2> and update
   `containers: qiime2` in `config.yaml`.

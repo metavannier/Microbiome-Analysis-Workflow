@@ -4,13 +4,15 @@
 
 # manifest.tsv with '$PWD' (and other variables) replaced by absolute
 # paths: QIIME 2 then also checks that R1 and R2 have the same number of
-# reads for every sample (this check is skipped for '$PWD' paths).
+# reads for every sample (this check is skipped for '$PWD' paths). The file
+# is temporary, so it is expanded again (with the current directory) before
+# every import, also after the project has been moved.
 rule expand_manifest:
     input:
         manifest=MANIFEST_FILE,
         script=script("make_manifest.py"),
     output:
-        f"{IMPORTDIR}/manifest-absolute-paths.tsv",
+        temp(f"{IMPORTDIR}/manifest-absolute-paths.tsv"),
     log:
         f"{LOGDIR}/02_qiime_import/expand_manifest.log",
     conda:

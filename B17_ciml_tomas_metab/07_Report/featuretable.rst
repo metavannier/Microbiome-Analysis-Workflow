@@ -1,2 +1,2 @@
-Frequency per sample and per feature (ASV), and sampling depth information. Use the "Interactive Sample Detail" tab to choose the rarefaction depth (config.yaml, diversity: samplingdepth): the samples below this depth are removed from the diversity and abundance analyses.
+Frequency per sample and per feature (ASV), and sampling depth information ("Interactive Sample Detail" tab). The rarefaction depth (config.yaml, diversity: samplingdepth) is best chosen on the table of the diversity analyses (05_phylogeny, feature table summary of the ASVs in the tree): samples below this depth are removed from the rarefied diversity metrics and from the abundance tables.
 Download, drag and drop the file on `QIIME 2 View <https://view.qiime2.org/>`_

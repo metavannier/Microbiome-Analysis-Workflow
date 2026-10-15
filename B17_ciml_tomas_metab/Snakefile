@@ -7,9 +7,19 @@
 #   selected with --config run_comparisons=<ID|all|none>.
 # ======================================================================
 
+import os
+
 from snakemake.utils import min_version, validate
 
 min_version("9.0")
+
+# conda (--sdm conda): the official QIIME 2 2026.7 environment cannot be
+# solved with strict channel priority (sortmerna=2.0 of bioconda is hidden
+# by conda-forge): flexible priority, whatever ~/.condarc says. Ignore the
+# Snakemake warning recommending strict priorities. The package cache is
+# kept next to the environments (.snakemake/conda-pkgs) unless set.
+os.environ.update(CONDA_CHANNEL_PRIORITY="flexible")
+os.environ.setdefault("CONDA_PKGS_DIRS", os.path.abspath(".snakemake/conda-pkgs"))
 
 
 configfile: "config.yaml"

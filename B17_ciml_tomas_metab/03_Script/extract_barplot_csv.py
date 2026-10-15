@@ -18,7 +18,9 @@ def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--qzv", required=True, help="taxa bar plot .qzv")
     p.add_argument("--level", type=int, default=7,
-                   help="taxonomic level (default 7 = species)")
+                   help="taxonomic level (default 7 = deepest rank: genus with "
+                        "SILVA 144, species with SILVA 138; see "
+                        "taxonomy_ranks.tsv)")
     p.add_argument("--output", required=True, help="output .csv")
     args = p.parse_args(argv)
 

@@ -34,9 +34,14 @@ import sys
 def expand(manifest, output):
     with open(manifest, encoding="utf-8-sig") as src, \
             open(output, "w") as dst:
-        for i, line in enumerate(src):
+        header_seen = False  # header = first non-blank, non-comment line
+        for line in src:
             fields = line.rstrip("\r\n").split("\t")
-            if i > 0 and len(fields) >= 3 and not line.startswith("#"):
+            if not line.strip() or line.startswith("#"):
+                pass
+            elif not header_seen:
+                header_seen = True
+            elif len(fields) >= 3:
                 fields[1:3] = [os.path.abspath(os.path.expandvars(f.strip()))
                                for f in fields[1:3]]
             dst.write("\t".join(fields) + "\n")
