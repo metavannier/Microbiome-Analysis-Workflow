@@ -1,5 +1,6 @@
 # ----------------------------------------------------------------------
-# Level 7 (deepest rank) taxon abundance tables for MetaboAnalyst
+# Taxon abundance tables for MetaboAnalyst (metaboanalyst: taxa_level;
+# SILVA 144: 7 = genus, 8 = species with the weighted classifiers)
 # ----------------------------------------------------------------------
 # Source: the level-N.csv of the project taxa bar plot, i.e. the file of
 # "Download CSV" in QIIME 2 View (rule barplot_csv). For each compared

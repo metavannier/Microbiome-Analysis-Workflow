@@ -133,11 +133,19 @@ properties:
     properties:
       classifier:
         type: string
+      check_classifier:
+        type: string
       confidence:
         type: number
       njobs:
         type: integer
         minimum: 1
+      reads_per_batch:
+        oneOf:
+          - type: integer
+            minimum: 1
+          - type: string
+            enum: ["auto"]
       exclude:
         type: string
         minLength: 1

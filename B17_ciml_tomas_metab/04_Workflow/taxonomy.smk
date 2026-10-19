@@ -2,6 +2,10 @@
 # Assigning taxonomy (naive Bayes classifier, SILVA)
 # ----------------------------------------------------------------------
 
+# Optional control classifier ("" = no genus check)
+CHECK_CLASSIFIER = config["taxonomy"].get("check_classifier", "")
+
+
 rule assign_tax:
     input:
         rep=f"{DADA2DIR}/{PROJ}-rep-filtered-seqs-{GROUP}.qza",
@@ -12,6 +16,7 @@ rule assign_tax:
         f"{LOGDIR}/04_taxonomy/{PROJ}_sklearn_q2.log",
     params:
         confidence=config["taxonomy"]["confidence"],
+        reads_per_batch=config["taxonomy"].get("reads_per_batch", "auto"),
     threads: config["taxonomy"]["njobs"]
     conda:
         QIIME_ENV
@@ -24,8 +29,54 @@ rule assign_tax:
             --i-reads {input.rep} \
             --p-confidence {params.confidence} \
             --p-n-jobs {threads} \
+            --p-reads-per-batch {params.reads_per_batch} \
             --o-classification {output} \
             --verbose > {log} 2>&1
+        """
+
+
+# Same classification with the control classifier (taxonomy:
+# check_classifier, the SILVA uniform classifier by default)
+use rule assign_tax as assign_tax_check with:
+    input:
+        rep=f"{DADA2DIR}/{PROJ}-rep-filtered-seqs-{GROUP}.qza",
+        classifier=CHECK_CLASSIFIER,
+    output:
+        f"{TAXDIR}/{PROJ}-tax_sklearn-check.qza",
+    log:
+        f"{LOGDIR}/04_taxonomy/{PROJ}_sklearn-check_q2.log",
+
+
+# Genera of the weighted (habitat-specific) classifier compared with the
+# uniform classifier, as recommended by SILVA: the "different" ASVs are
+# listed first
+rule taxonomy_genus_check:
+    input:
+        taxonomy=f"{TAXDIR}/taxonomy.tsv",
+        check=f"{TAXDIR}/{PROJ}-tax_sklearn-check.qza",
+        script=script("compare_taxonomy.py"),
+    output:
+        report(
+            f"{TAXDIR}/taxonomy_genus_check.tsv",
+            caption=caption("taxonomy_check"),
+            category="04 Taxonomy",
+            labels={"result": "genus check (uniform classifier)"},
+        ),
+    log:
+        f"{LOGDIR}/04_taxonomy/{PROJ}_taxonomy_genus_check.log",
+    params:
+        exportdir=f"{TAXDIR}/taxonomy_check_export",
+    conda:
+        QIIME_ENV
+    container:
+        QIIME_CONTAINER
+    shell:
+        """
+        (rm -rf {params.exportdir}
+        qiime tools export --input-path {input.check} --output-path {params.exportdir}
+        python {input.script} --taxonomy {input.taxonomy} \
+            --check {params.exportdir}/taxonomy.tsv --output {output}
+        rm -rf {params.exportdir}) > {log} 2>&1
         """
 
 
@@ -105,8 +156,8 @@ rule gen_tax:
         """
 
 
-# Rank held by each taxonomic level (level 7 = genus with SILVA 144
-# uniform classifiers, species with SILVA 138)
+# Rank held by each taxonomic level (SILVA 144: level 7 = genus, level 8 =
+# species with the weighted classifiers; SILVA 138: level 7 = species)
 rule taxonomy_ranks:
     input:
         taxonomy=f"{TAXDIR}/taxonomy.tsv",

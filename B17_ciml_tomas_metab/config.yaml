@@ -13,7 +13,8 @@ comparisons: "comparisons.tsv"     # comparisons to analyse (one report each)
 #   snakemake ... --config run_comparisons=L1_Feces_Female_CTL_vs_SAM
 run_comparisons: "all"
 
-# Optional directory for the QIIME 2 temporary files (needs space).
+# Optional directory for the QIIME 2 temporary files (needs space: the
+# weighted SILVA classifier is unpacked twice there, ~40 GB free needed).
 # Empty = system default ($TMPDIR or /tmp). With Apptainer, a directory
 # outside the project must also be bound (--apptainer-args "--bind DIR").
 tmpdir: ""
@@ -73,14 +74,26 @@ dada2:
 
 # Taxonomy
 taxonomy:
-    # Pre-trained naive Bayes classifier for QIIME 2 2026.7 downloaded from
-    # https://www.arb-silva.de/current-release/QIIME2/2026.7/SSU/V3V4-341f-806r/uniform
-    # (SILVA 144). Put the .qza in 01_Reference/ and check the file name.
-    # SILVA 144 taxonomy has 7 ranks: domain, kingdom, phylum, class, order,
-    # family, genus (the uniform classifiers do not include species).
-    classifier: "01_Reference/SILVA_144_SSURef_NR99_uniform_classifier_V3V4-341f-806r.qza"
+    # Pre-trained naive Bayes classifier for QIIME 2 2026.7 (SILVA 144),
+    # V3-V4 region (341f-806r), habitat-weighted "animal distal gut",
+    # downloaded from (see 01_Reference/README.md)
+    # https://www.arb-silva.de/current-release/QIIME2/2026.7/SSU/V3V4-341f-806r/weighted/animal-distal-gut
+    # Keep the SILVA file name. The weighted classifiers have 8 ranks:
+    # domain, kingdom, phylum, class, order, family, genus, species
+    # (level 7 = genus, level 8 = species). SILVA species are uncurated
+    # organism names: treat them as tentative. Needs ~24-32 GB of RAM and
+    # ~40 GB of free space in the temporary directory (tmpdir).
+    classifier: "01_Reference/SILVA_144_SSURef_NR99_weighted_classifier_V3V4-341f-806r_animal-distal-gut.qza"
+    # Uniform classifier (genus level, ~2 GB RAM) used to cross-check the
+    # genera of the weighted classifier, as recommended by SILVA
+    # (taxonomy_genus_check.tsv). "" = no check.
+    check_classifier: "01_Reference/SILVA_144_SSURef_NR99_uniform_classifier_V3V4-341f-806r.qza"
     confidence: 0.7
-    njobs: 4 # Be careful with the memory usage
+    # Parallel jobs of classify-sklearn: each job holds its own copy of the
+    # data, keep 1 with the weighted classifier (15.5 GB model)
+    njobs: 1
+    # ASVs classified per batch ("auto" = all at once): limits the memory
+    reads_per_batch: 1000
     # Taxa removed from the feature table (comma-separated, case-insensitive)
     exclude: "d__Eukaryota"
 
@@ -112,10 +125,10 @@ diversity:
 
 # Differential abundance (each comparison)
 differential_abundance:
-    # taxonomic level of the collapsed table: 7 = deepest rank of the
-    # classifier (genus with SILVA 144 uniform, species with SILVA 138);
-    # see 05_Output/04_taxonomy/taxonomy_ranks.tsv
-    taxa_level: 7
+    # taxonomic level of the collapsed table. SILVA 144: 7 = genus,
+    # 8 = species (weighted classifiers only; equivalent to the former
+    # level 7 of SILVA 138). See 05_Output/04_taxonomy/taxonomy_ranks.tsv
+    taxa_level: 8
     # frequency filtering by group of samples ('filter_column' of
     # comparisons.tsv): a taxon is kept in a group if its frequency is
     # >= min_frequency and it is present in >= min_sample samples
@@ -124,10 +137,10 @@ differential_abundance:
 
 # Taxon abundance tables for MetaboAnalyst (each comparison)
 metaboanalyst:
-    # level-N.csv of the taxa bar plot: 7 = deepest rank of the classifier
-    # (genus with SILVA 144 uniform, species with SILVA 138); check the rank
-    # of each level in 05_Output/04_taxonomy/taxonomy_ranks.tsv
-    taxa_level: 7
+    # level-N.csv of the taxa bar plot. SILVA 144: 7 = genus, 8 = species
+    # (weighted classifiers only; equivalent to the former level-7.csv of
+    # SILVA 138). See 05_Output/04_taxonomy/taxonomy_ranks.tsv
+    taxa_level: 8
     # relative abundance (proportion of the reads of the sample) or counts
     relative_abundance: true
     # remove the taxa absent from all the samples of the comparison

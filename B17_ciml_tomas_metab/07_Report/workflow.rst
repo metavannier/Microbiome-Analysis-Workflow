@@ -47,7 +47,17 @@ Assigning taxonomy
 ==================
 
 We use a machine learning classifier to assign taxonomies to the ASVs with the `classify-sklearn <https://doi.org/10.1186/s40168-018-0470-z>`_ method (confidence {{ snakemake.config["taxonomy"]["confidence"] }}).
-A naive Bayes classifier pre-trained on the `SILVA <https://www.arb-silva.de/>`_ SSU database for QIIME 2 2026.7 is used (file ``{{ snakemake.config["taxonomy"]["classifier"] }}``). The rank held by each taxonomic level is listed in *04 Taxonomy / taxonomy_ranks.tsv*: with the default SILVA 144 uniform classifier (V3-V4, 341f-806r), the 7 ranks are domain, kingdom, phylum, class, order, family and genus (level 7 = genus). ASVs assigned to {{ snakemake.config["taxonomy"]["exclude"] }} are removed.
+{% set tax = snakemake.config["taxonomy"] %}
+{% if "weighted" in tax["classifier"] %}
+A naive Bayes classifier pre-trained by `SILVA <https://www.arb-silva.de/>`_ (release 144, `Chuvochina et al., 2026 <https://doi.org/10.1093/nar/gkaf1247>`_) for QIIME 2 2026.7 is used (file ``{{ tax["classifier"] }}``). It is an experimental habitat-weighted classifier (`Kaehler et al., 2019 <https://doi.org/10.1038/s41467-019-12669-6>`_): the prior probability of each reference taxon was estimated from public samples of one habitat (Qiita samples of the EMPO 3 habitat given in the file name, e.g. "Animal distal gut"), which improves the species-level classification of samples from that habitat. Its 8 ranks are domain, kingdom, phylum, class, order, family, genus and species (level 7 = genus, level 8 = species; see *04 Taxonomy / taxonomy_ranks.tsv*). SILVA curates its taxonomy down to the genus only: the species are the organism names of the reference sequences, often placeholders (uncultured bacterium, metagenome) and sometimes wrong, so the species-level assignments are tentative and must be confirmed (e.g. BLAST or exact match of the ASV sequence) before any biological interpretation.
+{% if tax.get("check_classifier") %}
+As recommended by SILVA, the ASVs were also classified with ``{{ tax["check_classifier"] }}`` (uniform weights, genus level): the two taxonomies are compared in *04 Taxonomy / taxonomy_genus_check.tsv* (ASVs with different lineages first).
+{% endif %}
+{% else %}
+A naive Bayes classifier pre-trained on the `SILVA <https://www.arb-silva.de/>`_ SSU database for QIIME 2 2026.7 is used (file ``{{ tax["classifier"] }}``). The rank held by each taxonomic level is listed in *04 Taxonomy / taxonomy_ranks.tsv*: with the SILVA 144 uniform classifiers, the 7 ranks are domain, kingdom, phylum, class, order, family and genus (level 7 = genus).
+{% endif %}
+
+ASVs assigned to {{ tax["exclude"] }} are removed.
 
 Samples with fewer than {{ snakemake.config["diversity"]["samplingdepth"] }} reads (sampling depth) are removed from the taxonomic tables, the differential abundance and MetaboAnalyst tables, and from the rarefied diversity metrics (core metrics); the rarefaction curves and the feature table summaries show every sample.
 
@@ -71,7 +81,7 @@ For each comparison, the feature table is restricted to the samples of the compa
 Differential abundance
 ======================
 
-- Taxa are collapsed at the level {{ snakemake.config["differential_abundance"]["taxa_level"] }} (deepest rank of the classifier).
+- Taxa are collapsed at the level {{ snakemake.config["differential_abundance"]["taxa_level"] }} (SILVA 144: 7 = genus, 8 = species).
 - We process the frequency filtering by group of samples: one taxon is kept in a group if its frequency is >= {{ snakemake.config["differential_abundance"]["min_frequency"] }} and if it is present in at least {{ snakemake.config["differential_abundance"]["min_samples"] }} samples of the group.
 - `Analysis of Composition of Microbiomes (ANCOM) <https://pubmed.ncbi.nlm.nih.gov/26028277/>`_ identifies the taxa that are differentially abundant between the groups of each compared column.
 - The same filtered table is formatted for `LEfSe <https://doi.org/10.1186/gb-2011-12-6-r60>`_.

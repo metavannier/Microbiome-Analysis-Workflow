@@ -4,7 +4,7 @@
 
 def core_targets():
     """Common part, run once for all the comparisons."""
-    return [
+    targets = [
         # Quality control (FastQC/MultiQC before and after Trimmomatic)
         f"{QCDIR}/raw_multiqc.html",
         f"{QCDIR}/trimmed_multiqc.html",
@@ -26,6 +26,10 @@ def core_targets():
         # Phylogeny: table of the diversity analyses
         f"{PHYLODIR}/{PROJ}-taxa-table-filtered-tree-{PHYLO}-{GROUP}.qzv",
     ]
+    if CHECK_CLASSIFIER:
+        # Genera cross-checked with the uniform classifier
+        targets.append(f"{TAXDIR}/taxonomy_genus_check.tsv")
+    return targets
 
 
 def comparison_targets(cid):
@@ -49,7 +53,7 @@ def comparison_targets(cid):
                 column=columns, allow_missing=True),
         *expand(f"{DADIR}/{DA_PREFIX}-lefse-{{column}}.tsv",
                 column=columns, allow_missing=True),
-        # MetaboAnalyst (level 7 by default)
+        # MetaboAnalyst (metaboanalyst: taxa_level, 8 = species)
         *expand(f"{MADIR}/{COMP_PREFIX}-level-{MA_LEVEL}-{{column}}-metaboanalyst.csv",
                 column=columns, allow_missing=True),
     ]

@@ -13,9 +13,10 @@ filtering per group, ANCOM, LEfSe table) and adds:
 
 - comparisons defined in a table (`comparisons.tsv`), each analysed on its own
   subset of samples and producing its own report;
-- the level-7 taxon abundance tables (taxa bar plot "Download CSV" at
-  level 7) formatted for **MetaboAnalyst**, generated automatically for every
-  comparison;
+- the species-level taxon abundance tables (taxa bar plot "Download CSV",
+  level 8 with the SILVA 144 weighted classifier = the former level 7 of
+  SILVA 138) formatted for **MetaboAnalyst**, generated automatically for
+  every comparison;
 - containers / conda environments for every step, a single launcher
   (`run_workflow.sh`), configuration and sample-sheet validation.
 
@@ -32,9 +33,9 @@ filtering per group, ANCOM, LEfSe table) and adds:
 | `manifest.tsv` | QIIME 2 manifest (to create, see §3) — `manifest.example.tsv` shows the format |
 | `run_workflow.sh` | launcher (Snakemake through Apptainer) |
 | `00_RowData/` | raw FASTQ files (`M6969_S2_L001_R1_001.fastq.gz`, ...) |
-| `01_Reference/` | SILVA classifier and SEPP reference (`.qza`) |
+| `01_Reference/` | SILVA classifiers and SEPP reference (`.qza`) |
 | `02_Container/` | conda environments (QIIME 2 2026.7, FastQC, Trimmomatic, MultiQC) |
-| `03_Script/` | helper scripts (manifest, comparison metadata, MetaboAnalyst and LEfSe formatting) |
+| `03_Script/` | helper scripts (manifest, comparison metadata, taxonomy checks, MetaboAnalyst and LEfSe formatting) |
 | `04_Workflow/` | Snakemake rules |
 | `05_Output/` | results (created by the workflow) |
 | `06_Schemas/` | validation schemas of `config.yaml` and `comparisons.tsv` |
@@ -63,6 +64,10 @@ filtering per group, ANCOM, LEfSe table) and adds:
     (`run_workflow.sh` creates, binds and forwards them);
   - plus the results; QIIME 2 also writes large temporary files: set
     `tmpdir:` in `config.yaml` to a large directory if `/tmp` is small.
+- Memory: the taxonomic classification with the SILVA 144 weighted
+  classifier (15.5 GB model) needs **~24-32 GB of RAM** (`njobs: 1`,
+  `reads_per_batch: 1000`) and **~40 GB free in the temporary directory**
+  (`tmpdir:`, the classifier is unpacked twice); the other steps need less.
 
 Nothing else has to be installed: Snakemake itself runs in the official
 Snakemake container, and every step runs in its own software environment
@@ -92,16 +97,32 @@ otherwise the Python of the Snakemake container).
    `sample-metadata.tsv` (the workflow checks it).
 
 3. **References** (`01_Reference/`, see its README):
-   - the SILVA classifier for QIIME 2 **2026.7** downloaded from
-     <https://www.arb-silva.de/current-release/QIIME2/2026.7/SSU/V3V4-341f-806r/uniform>,
-     expected as `01_Reference/SILVA_144_SSURef_NR99_uniform_classifier_V3V4-341f-806r.qza`
-     (`taxonomy: classifier` in `config.yaml`; adapt it if your file name
-     differs). A classifier only works with the scikit-learn version it was
+   - the two SILVA 144 classifiers for QIIME 2 **2026.7**, V3-V4 region
+     `341f-806r` (it matches the 341F/785R amplicon to 2 nt; why these files:
+     §6.1):
+     - `SILVA_144_SSURef_NR99_weighted_classifier_V3V4-341f-806r_animal-distal-gut.qza`
+       (`taxonomy: classifier`): habitat-weighted "animal distal gut", 8 ranks
+       down to the **species**;
+     - `SILVA_144_SSURef_NR99_uniform_classifier_V3V4-341f-806r.qza`
+       (`taxonomy: check_classifier`): uniform weights, down to the genus,
+       used to cross-check the genera as recommended by SILVA
+       (`check_classifier: ""` skips it).
+
+     ```bash
+     cd 01_Reference
+     B=https://www.arb-silva.de/fileadmin/silva_databases/current/QIIME2/2026.7/SSU/V3V4-341f-806r
+     wget $B/weighted/animal-distal-gut/SILVA_144_SSURef_NR99_weighted_classifier_V3V4-341f-806r_animal-distal-gut.qza{,.md5,.doi}
+     wget $B/uniform/SILVA_144_SSURef_NR99_uniform_classifier_V3V4-341f-806r.qza{,.md5,.doi}
+     md5sum *.qza; cat *.md5       # the checksums must be identical
+     cd ..
+     ```
+
+     Keep the SILVA file names (Snakemake reruns the classification when the
+     file name in `config.yaml` changes; a file replaced under the same name
+     is not detected: `--forcerun assign_tax`) and the `.doi` files (DOI to
+     cite). A classifier only works with the scikit-learn version it was
      trained with (1.7.1 for QIIME 2 2026.4/2026.7); check with
-     `unzip -p 01_Reference/<classifier>.qza '*/data/sklearn_version.json'`.
-     The SILVA site is a JavaScript browser: download with `wget` from
-     `https://www.arb-silva.de/fileadmin/silva_databases/current/QIIME2/2026.7/SSU/V3V4-341f-806r/uniform/<file>`
-     and keep the `.md5`/`.doi` files next to it;
+     `unzip -p 01_Reference/<classifier>.qza '*/data/sklearn_version.json'`;
    - `sepp-refs-silva-128.qza` for the SEPP phylogeny (`phylogeny: seppdb`).
 
 4. **Parameters** — check `config.yaml`, in particular the DADA2 truncation
@@ -253,8 +274,10 @@ For every comparison and compared column:
   PERMANOVA (global + pairwise) on Jaccard / Bray-Curtis / unweighted and
   weighted UniFrac, PCoA (Emperor);
 - **differential abundance** (`02_differential_abundance/`): taxa collapsed at
-  level 7, frequency filtering by group, ANCOM, LEfSe input table;
-- **MetaboAnalyst** (`03_metaboanalyst/`): level-7 abundance table.
+  `taxa_level` (8 = species), frequency filtering by group, ANCOM, LEfSe
+  input table;
+- **MetaboAnalyst** (`03_metaboanalyst/`): abundance table at `taxa_level`
+  (8 = species).
 
 Results are in `05_Output/06_comparisons/<comparison>/`; the files of the
 common part in `05_Output/00_*` to `05_Output/05_phylogeny`. The tree and
@@ -262,33 +285,32 @@ the table of the diversity analyses are named after the phylogeny method
 (`...-rooted-tree-sepp.qza`): changing `phylogeny: method` builds a new tree
 and reruns the diversity analyses.
 
-## 6. Level-7 tables for MetaboAnalyst
+## 6. Species-level tables for MetaboAnalyst
 
-> **Level 7 is the genus with the SILVA 144 classifiers.** The SILVA
-> classifiers published for QIIME 2 2026.7 (SILVA release 144) have 7 ranks:
-> domain, **kingdom** (new rank), phylum, class, order, family, genus — and
-> SILVA states that the *uniform* classifiers do not include species. With
-> the previous SILVA 138 classifier (your former `level-7.csv`,
+> **Level 8 = species with SILVA 144 (= former level 7).** The SILVA
+> classifiers published for QIIME 2 2026.7 (SILVA release 144) have a new
+> rank, the **kingdom**: domain, kingdom, phylum, class, order, family,
+> genus (level 7) and, for the *weighted* classifiers only, species
+> (level 8); the *uniform* classifiers stop at the genus. With the previous
+> SILVA 138 classifier (your former `level-7.csv`,
 > `d__;p__;c__;o__;f__;g__;s__`), level 7 was the species. The workflow
 > writes `05_Output/04_taxonomy/taxonomy_ranks.tsv` (also in the report) with
-> the rank of each level for your classifier. The level is set in
-> `config.yaml` (`metaboanalyst: taxa_level`, `differential_abundance:
-> taxa_level`); a species level needs a classifier that includes species
-> (e.g. a SILVA 144 *weighted* classifier, which is habitat-specific, or a
-> classifier trained with species labels for scikit-learn 1.7.1); check its
-> levels in `taxonomy_ranks.tsv` and set `taxa_level` accordingly.
+> the rank of each level and the number of ASVs that get an informative
+> name. The level is set in `config.yaml` (`metaboanalyst: taxa_level`,
+> `differential_abundance: taxa_level`): 8 (species) by default, 7 for the
+> genus. Read §6.1 before interpreting the species.
 
 For each comparison and compared column, the workflow writes
-`05_Output/06_comparisons/<ID>/03_metaboanalyst/undernutrition-<ID>-level-7-<column>-metaboanalyst.csv`:
+`05_Output/06_comparisons/<ID>/03_metaboanalyst/undernutrition-<ID>-level-8-<column>-metaboanalyst.csv`:
 
 ```
-Sample,Group,Unassigned;__;__;__;__;__;__,d__Bacteria;__;__;__;__;__;__,...
+Sample,Group,Unassigned;__;__;__;__;__;__;__,d__Bacteria;__;__;__;__;__;__;__,...
 M6995,CTL,0,0,...
 ```
 
-- source: `05_Output/04_taxonomy/undernutrition-level-7.csv`, extracted from
+- source: `05_Output/04_taxonomy/undernutrition-level-8.csv`, extracted from
   `undernutrition-taxa-bar-plots.qzv` — the very file obtained with
-  *Download CSV* at taxonomic level 7 in QIIME 2 View;
+  *Download CSV* at taxonomic level 8 in QIIME 2 View;
 - samples of the comparison only, in rows; `Group` = value of the compared
   metadata column in `sample-metadata.tsv` (it replaces the second column of
   the former "Ileum-cleaned-F vs M.csv");
@@ -315,9 +337,9 @@ The script can also be used by hand (Python 3 with pandas):
 
 ```bash
 # with the metadata (new procedure)
-python3 03_Script/format_taxa_table.py --taxa-csv level-7.csv \
+python3 03_Script/format_taxa_table.py --taxa-csv undernutrition-level-8.csv \
     --metadata sample-metadata.tsv --group-column Name-experiment \
-    --subset "Body-site=Ileal" --output Ileal-level-7.csv
+    --subset "Body-site=Ileal" --output Ileal-level-8.csv
 # with an existing MetaboAnalyst table giving Sample/Group (old procedure)
 python3 03_Script/format_taxa_table.py --taxa-csv level-7.csv \
     --groups-from "Ileum-cleaned-F vs M.csv" --output Ileal-level-7.csv
@@ -329,6 +351,66 @@ the first taxon), so the metadata columns appended by QIIME 2 at the end of
 
 (`python3 03_Script/format_taxa_table.py --help` for all the options.)
 
+### 6.1 Choice of the SILVA classifier (species level)
+
+Only the SILVA 144 **weighted** classifiers go down to the species. They are
+experimental: the prior probability of each reference taxon was estimated
+from public samples of one habitat (Qiita samples of an EMPO 3 habitat,
+[Kaehler et al. 2019](https://doi.org/10.1038/s41467-019-12669-6)); SILVA
+warns that a classifier used on another habitat gives incorrect results and
+recommends checking the genera with a uniform classifier.
+
+| SILVA 144 file (QIIME 2 2026.7) | Species | Use here |
+|---|---|---|
+| `V3V4-341f-806r/weighted/animal-distal-gut/…_V3V4-341f-806r_animal-distal-gut.qza` | yes | **`classifier`**: region of the amplicon, EMPO 3 habitat of feces and caecum |
+| `V3V4-341f-806r/weighted/average/…_V3V4-341f-806r_average.qza` | yes | equivalent alternative (same calls for ~96 % of the mouse isolates tested) |
+| `V3V4-341f-806r/weighted/animal-proximal-gut/…` | yes | not recommended: weights dominated by aquatic-animal gut taxa (e.g. *A. muciniphila* → `s__metagenome`) |
+| `V3V4-341f-806r/uniform/…_uniform_classifier_V3V4-341f-806r.qza` | no | **`check_classifier`** (genus cross-check) |
+| `full-length/weighted/*` | yes | **not recommended**: genus errors on mouse sequences (*E. coli* → `g__Salmonella`, *L. reuteri* → `g__Aliineobacillus`, *E. faecalis* → `g__Lactiplantibacillus`) |
+| `full-length/uniform/…` (both names are the same file) | no | genus only |
+
+One classifier is used for the three body sites: the ileum is a "proximal
+gut" habitat, but the proximal-gut weights fit the mouse ileum less well
+than the distal-gut ones, and one classifier keeps the same name for the
+same ASV in every body site (the comparisons are always within one body
+site).
+
+These choices rest on the SILVA files themselves (ranks, primers and habitat
+read from their provenance) and on an in-silico classification of 195 V3-V4
+inserts of mouse gut isolates (miBC collection, cut with the 341F/785R
+primers) by a re-implementation of `classify-sklearn` on the SILVA models
+(not a QIIME 2 run; cultured isolates, so an optimistic test).
+
+What to expect at level 8:
+
+- SILVA curates its taxonomy down to the genus only: the species are the
+  organism names of the reference sequences. Many ASVs get a placeholder
+  (`s__uncultured_bacterium`, `s__metagenome`) or stop at the genus
+  (`…;g__X;__`); `taxonomy_ranks.tsv` counts the informative names.
+- Where the V3-V4 sequences of several species are (nearly) identical, the
+  habitat weights (mostly human gut samples) choose the species, with a high
+  confidence. Correct in the test: *Muribaculum intestinale*, *Mucispirillum
+  schaedleri*, *Acetatifactor muris*, *Lactobacillus rodentium*,
+  *Bifidobacterium animalis*… Systematic errors: *Escherichia coli* →
+  `s__Escherichia_fergusonii`; *L. johnsonii*, *L. taiwanensis* →
+  `s__Lactobacillus_gasseri`; *Limosilactobacillus reuteri* →
+  `s__Limosilactobacillus_vaginalis`; *Enterococcus faecalis* →
+  `s__Enterococcus_plantarum`; *Ligilactobacillus murinus*, *Faecalibaculum
+  rodentium*, *Duncaniella muris* → `s__uncultured_bacterium`; *Bacteroides
+  acidifaciens* stops at the genus. About 4 in 10 of the species names given
+  to these isolates were wrong (20/52), and no confidence threshold removes
+  these errors.
+- The segmented filamentous bacteria (ileum) have no genus of their own in
+  SILVA 144 (`g__Clostridium--other`, species `s__Candidatus_Arthromitus`).
+
+So: treat the species as hypotheses, confirm the species of the ASVs you
+discuss (BLAST against 16S type material, exact match, qPCR), check the ASVs
+listed as `different` in `taxonomy_genus_check.tsv`, keep the genus level
+(`taxa_level: 7`) as the robust reference, and cite the classifier DOI
+(`.doi` file), SILVA ([Chuvochina et al. 2026](https://doi.org/10.1093/nar/gkaf1247)),
+q2-clawback ([Kaehler et al. 2019](https://doi.org/10.1038/s41467-019-12669-6))
+and RESCRIPt ([Robeson et al. 2021](https://doi.org/10.1371/journal.pcbi.1009581)).
+
 ## 7. Changes compared with the previous workflow
 
 Methodology kept: Trimmomatic (`LEADING:2 TRAILING:2 SLIDINGWINDOW:4:2 MINLEN:25`),
@@ -336,7 +418,8 @@ cutadapt (same primers and options), DADA2 (same truncation, trimming,
 expected errors, training reads), length filter ≥ 400 nt, naive Bayes
 classification (confidence 0.7), exclusion of `d__Eukaryota`, removal of the
 samples below the sampling depth, SEPP tree, core metrics, alpha/beta group
-significance, collapse at level 7, frequency filtering by group
+significance, collapse at the species level (level 7 with SILVA 138 =
+level 8 with SILVA 144 weighted), frequency filtering by group
 (≥ 50 reads in ≥ 2 samples), pseudocount + ANCOM, LEfSe table.
 
 Changes required by the current software or by the new data:
@@ -345,12 +428,16 @@ Changes required by the current software or by the new data:
   of `pooled`. The `pooled` option was removed from QIIME 2 in release 2025.4
   ([q2-dada2 #171](https://github.com/qiime2/q2-dada2/pull/171)); it is not
   accepted by any release that can use the 2026.7 SILVA classifier.
-- **Classifier**: SILVA 138 99 % full-length naive Bayes classifier →
-  SILVA 144 NR99 uniform classifier trained on the V3-V4 region (341f-806r)
-  for QIIME 2 2026.7 (scikit-learn 1.7.1). Same confidence (0.7), but a new
-  database release and region-specific training change the assignments, and
-  the 7 ranks now include the kingdom: level 7 is the genus (see §6). Keep it
-  in mind when comparing with earlier projects.
+- **Classifier**: SILVA 138 99 % full-length naive Bayes classifier (uniform
+  weights, species labels) → SILVA 144 NR99 classifier for QIIME 2 2026.7
+  (scikit-learn 1.7.1) trained on the V3-V4 region (341f-806r) with
+  "animal distal gut" habitat weights, the only SILVA 144 classifiers with
+  species (the uniform ones stop at the genus). Same confidence (0.7), but a
+  new database release, region-specific training and habitat weights change
+  the assignments, above all the species; the ranks now include the
+  kingdom: level 8 is the species (see §6). Keep it in mind when comparing
+  with earlier projects. New: genus cross-check with the uniform classifier
+  (`taxonomy_genus_check.tsv`).
 - QIIME 2 2026.7 commands: new required outputs (cutadapt statistics, DADA2
   base-transition statistics, feature-table summarize frequencies), shown in
   the reports.
@@ -401,6 +488,14 @@ Other minor differences:
 - `maxdepth` guidance: about the median (not the mean) frequency per sample.
 
 ## 8. Troubleshooting
+
+- **`assign_tax` killed / `MemoryError`**: the weighted classifier needs
+  ~24-32 GB of RAM. Keep `njobs: 1`, lower `reads_per_batch` (e.g. 200), use
+  a node with more memory, or fall back on the uniform classifier (genus
+  level: `classifier:` = the uniform file, `check_classifier: ""`,
+  `taxa_level: 7`).
+- **`No space left on device` in `assign_tax`**: the weighted classifier is
+  unpacked twice in the temporary directory (~40 GB): set `tmpdir:`.
 
 - **`No space left on device` in a QIIME 2 step**: set `tmpdir:` in
   `config.yaml` to a large directory (`run_workflow.sh` binds it).
