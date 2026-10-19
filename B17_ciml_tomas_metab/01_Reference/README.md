@@ -17,7 +17,15 @@ Reference databases (paths set in `config.yaml`):
   (112,685,152 bytes, DOI 10.82364/144/SSU/Ref-NR99/QIIME2/2026.7/V3V4-341f-806r/uniform),
   from <https://www.arb-silva.de/current-release/QIIME2/2026.7/SSU/V3V4-341f-806r/uniform>.
 - **SEPP reference** (`phylogeny: seppdb`, only with `method: "sepp"`):
-  `sepp-refs-silva-128.qza` (QIIME 2 data resources).
+  `sepp-refs-silva-128.qza`, the SEPP reference database of the QIIME 2 data
+  resources (MD5 `7879792a6f42c5325531de9866f5c4de`), built from the
+  [SEPP-Refs project](https://github.com/smirarab/sepp-refs/): a reference
+  alignment, its tree and the RAxML model (type `SeppReferenceDatabase`).
+  The SILVA ARB files (`SILVA_144_SSURef_NR99_opt.arb.gz`) are databases of
+  the ARB software, not SEPP references: do not use them here. The SILVA
+  release of the tree (128) does not have to match the classifier (144):
+  the tree only serves the phylogenetic diversity metrics (Faith PD,
+  UniFrac).
 
 Download (the SILVA site is a JavaScript browser; the files themselves are
 under `fileadmin`):
@@ -28,6 +36,8 @@ B=https://www.arb-silva.de/fileadmin/silva_databases/current/QIIME2/2026.7/SSU/V
 wget $B/weighted/animal-distal-gut/SILVA_144_SSURef_NR99_weighted_classifier_V3V4-341f-806r_animal-distal-gut.qza{,.md5,.doi}
 wget $B/uniform/SILVA_144_SSURef_NR99_uniform_classifier_V3V4-341f-806r.qza{,.md5,.doi}
 md5sum *.qza; cat *.md5      # the checksums must be identical
+wget https://data.qiime2.org/classifiers/sepp-ref-dbs/sepp-refs-silva-128.qza
+md5sum sepp-refs-silva-128.qza   # 7879792a6f42c5325531de9866f5c4de
 ```
 
 Keep the SILVA file names and the `.doi` files (DOI to cite). A classifier

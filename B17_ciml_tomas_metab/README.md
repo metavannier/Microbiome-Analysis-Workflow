@@ -123,7 +123,14 @@ otherwise the Python of the Snakemake container).
      cite). A classifier only works with the scikit-learn version it was
      trained with (1.7.1 for QIIME 2 2026.4/2026.7); check with
      `unzip -p 01_Reference/<classifier>.qza '*/data/sklearn_version.json'`;
-   - `sepp-refs-silva-128.qza` for the SEPP phylogeny (`phylogeny: seppdb`).
+   - `sepp-refs-silva-128.qza` for the SEPP phylogeny (`phylogeny: seppdb`),
+     the SEPP reference database of the QIIME 2 data resources (MD5
+     `7879792a6f42c5325531de9866f5c4de`):
+     `wget https://data.qiime2.org/classifiers/sepp-ref-dbs/sepp-refs-silva-128.qza`.
+     It is a QIIME 2 artifact (reference alignment + tree + RAxML model);
+     the SILVA ARB files (`*.arb.gz`) cannot be used. Its SILVA release
+     (128) does not have to match the classifier (144): the tree only serves
+     the phylogenetic diversity metrics (Faith PD, UniFrac).
 
 4. **Parameters** — check `config.yaml`, in particular the DADA2 truncation
    lengths and the sampling depth (see §4, step 1).

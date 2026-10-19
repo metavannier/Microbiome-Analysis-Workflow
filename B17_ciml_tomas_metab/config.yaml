@@ -101,7 +101,8 @@ taxonomy:
 phylogeny:
     # method to use to construct the tree (MUST BE fasttree or sepp)
     method: "sepp"
-    # SEPP reference database
+    # SEPP reference database (QIIME 2 artifact, see 01_Reference/README.md;
+    # not a SILVA ARB file)
     seppdb: "01_Reference/sepp-refs-silva-128.qza"
     threads: 10
 
