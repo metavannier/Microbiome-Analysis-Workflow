@@ -13,11 +13,13 @@ comparisons: "comparisons.tsv"     # comparisons to analyse (one report each)
 #   snakemake ... --config run_comparisons=L1_Feces_Female_CTL_vs_SAM
 run_comparisons: "all"
 
-# Optional directory for the QIIME 2 temporary files (needs space: the
-# weighted SILVA classifier is unpacked twice there, ~40 GB free needed).
-# Empty = system default ($TMPDIR or /tmp). With Apptainer, a directory
-# outside the project must also be bound (--apptainer-args "--bind DIR").
-tmpdir: ""
+# Directory for the QIIME 2 temporary files. It needs space: the weighted
+# SILVA classifier is unpacked twice there (~40 GB free needed), more than
+# /tmp has on most servers. Default: "tmp" in the project directory
+# (relative paths are relative to the project). Empty = system default
+# ($TMPDIR or /tmp). A directory outside the project is bound in Apptainer
+# by run_workflow.sh.
+tmpdir: "tmp"
 
 project:
     # Project name (prefix of the output files)

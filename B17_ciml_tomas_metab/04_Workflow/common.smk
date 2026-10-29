@@ -5,6 +5,7 @@
 import mimetypes
 import os
 import re
+import shlex
 import sys
 
 import pandas as pd
@@ -70,7 +71,8 @@ def script(name):
 # and an optional temporary directory with enough space for QIIME 2.
 _prefix = "set -euo pipefail; export LC_ALL=C.UTF-8 LANG=C.UTF-8; "
 if config.get("tmpdir"):
-    _prefix += "mkdir -p {0}; export TMPDIR={0}; ".format(config["tmpdir"])
+    _tmpdir = shlex.quote(os.path.abspath(config["tmpdir"]))
+    _prefix += f"mkdir -p {_tmpdir}; export TMPDIR={_tmpdir}; "
 shell.prefix(_prefix)
 
 

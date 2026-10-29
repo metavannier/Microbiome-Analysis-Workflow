@@ -162,11 +162,22 @@ make_report() {
         echo "Report: $(report_path "$1")"
 }
 
-# Reports of the comparisons of a run, even if some of them failed
+# Results of a comparison complete and up to date (nothing left to run)
+is_complete() {
+    snakemake_sel "$1" --dry-run --cores 1 ${DEPLOY[@]+"${DEPLOY[@]}"} 2>&1 |
+        grep -q "Nothing to be done"
+}
+
+# Reports of the comparisons of a run, even if some of them failed: after
+# a failure, only the comparisons whose results are complete get a report
 make_reports() {
     local status=$1 id missing=()
     shift
     for id in "$@"; do
+        if [ "$status" -ne 0 ] && ! is_complete "$id"; then
+            missing+=("$id")
+            continue
+        fi
         make_report "$id" || missing+=("$id")
     done
     if [ "${#missing[@]}" -gt 0 ]; then

@@ -9,6 +9,7 @@
 *.sif
 05_Output/
 08_Log/
+tmp/
 reports/
 # Snakemake, conda and Apptainer caches
 .snakemake/

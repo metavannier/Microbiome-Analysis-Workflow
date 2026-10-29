@@ -502,7 +502,12 @@ Other minor differences:
   level: `classifier:` = the uniform file, `check_classifier: ""`,
   `taxa_level: 7`).
 - **`No space left on device` in `assign_tax`**: the weighted classifier is
-  unpacked twice in the temporary directory (~40 GB): set `tmpdir:`.
+  unpacked twice in the temporary directory (~40 GB). `tmpdir:` (default
+  `tmp` in the project) must be on a disk with that much free space
+  (`df -h tmp`); do not leave it empty if `/tmp` is small. Delete the
+  leftovers of the failed run that you own in the old temporary directory
+  (`find /tmp -maxdepth 1 -user $USER -name 'tmp*'` and `/tmp/qiime2`),
+  then run again.
 
 - **`No space left on device` in a QIIME 2 step**: set `tmpdir:` in
   `config.yaml` to a large directory (`run_workflow.sh` binds it).
