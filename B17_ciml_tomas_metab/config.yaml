@@ -111,8 +111,10 @@ phylogeny:
 # Diversity (each comparison)
 diversity:
     mindepth: 10
-    # Axis limit of the alpha rarefaction plot: take about the median
-    # frequency per sample (04_taxonomy/undernutrition-taxa-table-filtered-dada2.qzv)
+    # Axis limit (largest depth) of the alpha rarefaction curves only (no
+    # effect on the other analyses): about the median frequency per sample
+    # of 05_phylogeny/undernutrition-taxa-table-filtered-tree-sepp-dada2.qzv.
+    # Samples with fewer reads drop out of the curves beyond their depth.
     maxdepth: 64500
     # Rarefaction depth: see the alpha rarefaction curves (when the alpha
     # diversity stabilises) and the feature table summary (samples below
