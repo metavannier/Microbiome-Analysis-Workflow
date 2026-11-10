@@ -60,8 +60,13 @@ primer:
 # Dada2
 dada2:
     truncation_err: 2
+    # Reads shorter than these lengths after primer removal are discarded:
+    # R1 251-17 = 234 nt, R2 251-21 = 230 nt. Some reads lose 1-6 nt at the
+    # 3' end (sequencer adapter trimming): up to 7% of the R2 of the
+    # Female CTL ileal samples are 245-249 nt. 225 keeps the R2 >= 246 nt
+    # (overlap with R1 still >= 24 nt for 430-nt inserts).
     truncation_len-f: 229
-    truncation_len-r: 229
+    truncation_len-r: 225
     trim-left-f: 0
     trim-left-r: 0
     quality_err-f: 2
