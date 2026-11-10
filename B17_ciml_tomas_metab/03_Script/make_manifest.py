@@ -21,7 +21,9 @@
 #
 #   With --expand MANIFEST, the script instead copies an existing
 #   manifest with '$PWD' (and any environment variable) replaced by its
-#   value (used by the workflow before the QIIME 2 import).
+#   value (used by the workflow before the QIIME 2 import). With
+#   --reads-dir DIR, the directory of every FASTQ path is replaced by DIR
+#   (the raw reads of 00_RowData when Trimmomatic is skipped).
 #
 # #################################################################
 
@@ -31,7 +33,7 @@ import os
 import sys
 
 
-def expand(manifest, output):
+def expand(manifest, output, reads_dir=None):
     with open(manifest, encoding="utf-8-sig") as src, \
             open(output, "w") as dst:
         header_seen = False  # header = first non-blank, non-comment line
@@ -44,6 +46,10 @@ def expand(manifest, output):
             elif len(fields) >= 3:
                 fields[1:3] = [os.path.abspath(os.path.expandvars(f.strip()))
                                for f in fields[1:3]]
+                if reads_dir:
+                    fields[1:3] = [os.path.join(os.path.abspath(reads_dir),
+                                                os.path.basename(f))
+                                   for f in fields[1:3]]
             dst.write("\t".join(fields) + "\n")
     print(f"{manifest} -> {output}")
 
@@ -53,6 +59,9 @@ def main(argv=None):
     p.add_argument("--expand", metavar="MANIFEST",
                    help="expand the variables of an existing manifest")
     p.add_argument("--raw-dir", default="00_RowData")
+    p.add_argument("--reads-dir",
+                   help="with --expand: directory of the FASTQ files to "
+                        "import (replaces the directory of the manifest)")
     p.add_argument("--trimmed-dir", default="$PWD/05_Output/00_trimmed",
                    help="directory written in the manifest "
                         "(default: $PWD/05_Output/00_trimmed)")
@@ -65,7 +74,7 @@ def main(argv=None):
     args = p.parse_args(argv)
 
     if args.expand:
-        expand(args.expand, args.output)
+        expand(args.expand, args.output, args.reads_dir)
         return
 
     r1_files = sorted(glob.glob(os.path.join(args.raw_dir,

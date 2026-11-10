@@ -11,24 +11,29 @@ rule expand_manifest:
     input:
         manifest=MANIFEST_FILE,
         script=script("make_manifest.py"),
+        # imported reads: trimmed by Trimmomatic, or raw if it is skipped
+        reads=expand(f"{READSDIR}/{{name}}", name=FASTQ_NAMES),
     output:
         temp(f"{IMPORTDIR}/manifest-absolute-paths.tsv"),
     log:
         f"{LOGDIR}/02_qiime_import/expand_manifest.log",
+    params:
+        readsdir=lambda wildcards, input: os.path.dirname(input.reads[0]),
     conda:
         QIIME_ENV
     container:
         QIIME_CONTAINER
     shell:
         """
-        python {input.script} --expand {input.manifest} --output {output} > {log} 2>&1
+        python {input.script} --expand {input.manifest} \
+            --reads-dir {params.readsdir} --output {output} > {log} 2>&1
         """
 
 
 rule qiime_import:
     input:
         manifest=f"{IMPORTDIR}/manifest-absolute-paths.tsv",
-        reads=expand(f"{TRIMDIR}/{{name}}", name=FASTQ_NAMES),
+        reads=expand(f"{READSDIR}/{{name}}", name=FASTQ_NAMES),
     output:
         f"{IMPORTDIR}/{PROJ}-demux-paired-end.qza",
     log:

@@ -44,6 +44,11 @@ containers:
 
 # Trimmomatic (quality trimming of the raw reads)
 trimmomatic:
+    # true: no Trimmomatic, the raw reads of 00_RowData are imported in
+    # QIIME 2 (manifest.tsv is unchanged: only the file names are used).
+    # DADA2 already does the quality control (trunc-q, trunc-len, max-ee).
+    # Changing it reruns everything from the QIIME 2 import.
+    skip: true
     trimmer: "LEADING:2 TRAILING:2 SLIDINGWINDOW:4:2 MINLEN:25"
     extra: ""
     threads: 4

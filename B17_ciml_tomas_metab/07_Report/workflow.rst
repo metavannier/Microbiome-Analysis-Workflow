@@ -32,7 +32,7 @@ Some steps produce a summary report in .qzv which can be visualized on `QIIME 2 
 Quality control
 ===============
 
-- Quality of the raw reads were assessed using `FastQC <https://www.bioinformatics.babraham.ac.uk/projects/fastqc/>`_ (Andrews, 2010) and summarised with `MultiQC <https://doi.org/10.1093/bioinformatics/btw354>`_. Low quality reads were trimmed using `Trimmomatic <https://academic.oup.com/bioinformatics/article/30/15/2114/2390096>`_ (Bolger et al., 2014) with the steps ``{{ snakemake.config["trimmomatic"]["trimmer"] }}``.
+- Quality of the raw reads were assessed using `FastQC <https://www.bioinformatics.babraham.ac.uk/projects/fastqc/>`_ (Andrews, 2010) and summarised with `MultiQC <https://doi.org/10.1093/bioinformatics/btw354>`_.{% if snakemake.config["trimmomatic"].get("skip") %} The raw reads were imported without prior trimming: the quality control is done by DADA2 (see below).{% else %} Low quality reads were trimmed using `Trimmomatic <https://academic.oup.com/bioinformatics/article/30/15/2114/2390096>`_ (Bolger et al., 2014) with the steps ``{{ snakemake.config["trimmomatic"]["trimmer"] }}``.{% endif %}
 
 - We remove the V3-V4 primers ({{ snakemake.config["primer"]["primerF"] }} / {{ snakemake.config["primer"]["primerR"] }}) using `cutadapt <https://journal.embnet.org/index.php/embnetjournal/article/view/200/479>`_ (error rate {{ snakemake.config["primer"]["primer_err"] }}, minimum overlap {{ snakemake.config["primer"]["primer_overlap"] }}; read pairs without primers are discarded).
 

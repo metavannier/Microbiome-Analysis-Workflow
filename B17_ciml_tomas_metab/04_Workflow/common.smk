@@ -24,6 +24,9 @@ LOGDIR = "08_Log"
 
 TRIMDIR = f"{OUTPUTDIR}/00_trimmed"
 UNPAIREDDIR = f"{OUTPUTDIR}/00_unpaired"
+# trimmomatic: skip: true -> the raw reads are imported in QIIME 2
+SKIP_TRIMMING = config["trimmomatic"].get("skip", False)
+READSDIR = ROWDATA if SKIP_TRIMMING else TRIMDIR
 QCDIR = f"{OUTPUTDIR}/01_fastqc"
 IMPORTDIR = f"{OUTPUTDIR}/02_qiime_import"
 DADA2DIR = f"{OUTPUTDIR}/03_dada2"
@@ -101,8 +104,10 @@ METADATA = read_qiime_metadata(METADATA_FILE)
 
 def read_manifest(path):
     """Read manifest.tsv. The FASTQ paths must point to the reads trimmed
-    by the workflow (05_Output/00_trimmed/<raw file name>); '$PWD' and
-    other environment variables are expanded as QIIME 2 does."""
+    by the workflow (05_Output/00_trimmed/<raw file name>) or to the raw
+    reads (00_RowData/); '$PWD' and other environment variables are
+    expanded as QIIME 2 does. Only the file names are used: the reads are
+    imported from READSDIR (raw reads when trimmomatic: skip is true)."""
     if not os.path.exists(path):
         raise WorkflowError(
             f"Manifest '{path}' not found. Put the FASTQ files in "
@@ -120,17 +125,18 @@ def read_manifest(path):
     mf = mf[mf["sample-id"].str.strip() != ""]
     if mf["sample-id"].duplicated().any():
         raise WorkflowError(f"Duplicated sample IDs in {path}")
-    trimdir = os.path.abspath(TRIMDIR)
+    allowed = {os.path.abspath(TRIMDIR), os.path.abspath(ROWDATA)}
     fastqs = {}
     for _, row in mf.iterrows():
         sample = row["sample-id"].strip()
         for col in expected[1:]:
             fq = os.path.expandvars(row[col].strip().replace(
                 "$PWD", os.getcwd()))
-            if os.path.dirname(os.path.abspath(fq)) != trimdir:
+            if os.path.dirname(os.path.abspath(fq)) not in allowed:
                 raise WorkflowError(
                     f"{path}: '{row[col]}' (sample {sample}) must be in "
-                    f"$PWD/{TRIMDIR}/ (reads trimmed by the workflow).")
+                    f"$PWD/{TRIMDIR}/ (reads trimmed by the workflow) or "
+                    f"$PWD/{ROWDATA}/.")
             name = os.path.basename(fq)
             if not name.endswith(FASTQ_EXT):
                 raise WorkflowError(f"{path}: {name} is not a .fastq.gz")

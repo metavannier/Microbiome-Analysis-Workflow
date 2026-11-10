@@ -60,6 +60,8 @@ properties:
   trimmomatic:
     type: object
     properties:
+      skip:
+        type: boolean
       trimmer:
         type: string
       extra:

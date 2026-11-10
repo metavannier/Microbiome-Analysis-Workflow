@@ -94,7 +94,12 @@ otherwise the Python of the Snakemake container).
    ```
 
    The samples analysed are those of the manifest; they must all be in
-   `sample-metadata.tsv` (the workflow checks it).
+   `sample-metadata.tsv` (the workflow checks it). Only the file names of
+   the manifest are used: with `trimmomatic: skip: true` (default), the
+   same files are imported from `00_RowData/` without Trimmomatic (DADA2
+   does the quality control); with `skip: false`, the reads trimmed by
+   Trimmomatic in `05_Output/00_trimmed/` are imported. Changing `skip`
+   reruns everything from the QIIME 2 import.
 
 3. **References** (`01_Reference/`, see its README):
    - the two SILVA 144 classifiers for QIIME 2 **2026.7**, V3-V4 region
@@ -420,9 +425,8 @@ and RESCRIPt ([Robeson et al. 2021](https://doi.org/10.1371/journal.pcbi.1009581
 
 ## 7. Changes compared with the previous workflow
 
-Methodology kept: Trimmomatic (`LEADING:2 TRAILING:2 SLIDINGWINDOW:4:2 MINLEN:25`),
-cutadapt (same primers and options), DADA2 (same truncation, trimming,
-expected errors, training reads), length filter ≥ 400 nt, naive Bayes
+Methodology kept: cutadapt (same primers and options), DADA2 (same
+trimming, expected errors, training reads), length filter ≥ 400 nt, naive Bayes
 classification (confidence 0.7), exclusion of `d__Eukaryota`, removal of the
 samples below the sampling depth, SEPP tree, core metrics, alpha/beta group
 significance, collapse at the species level (level 7 with SILVA 138 =
@@ -430,6 +434,16 @@ level 8 with SILVA 144 weighted), frequency filtering by group
 (≥ 50 reads in ≥ 2 samples), pseudocount + ANCOM, LEfSe table.
 
 Changes required by the current software or by the new data:
+
+- **No Trimmomatic by default** (`trimmomatic: skip: true`). Its steps
+  (`LEADING:2 TRAILING:2 SLIDINGWINDOW:4:2 MINLEN:25`) only remove bases of
+  quality < 2, which Illumina does not produce (lowest score Q2), and DADA2
+  already truncates at the first base of quality ≤ 2 (`--p-trunc-q 2`):
+  the step was redundant. `skip: false` restores it.
+- **DADA2 reverse truncation 225** (229 before): the sequencer trims 1-6 nt
+  from the 3' end of some reads, and with 229 an R2 had to be ≥ 250 nt
+  (21-nt primer); up to 7 % of the R2 of the Female CTL ileal samples were
+  discarded. The forward truncation stays at 229.
 
 - **DADA2 chimera removal: `consensus`** (DADA2 and QIIME 2 default) instead
   of `pooled`. The `pooled` option was removed from QIIME 2 in release 2025.4

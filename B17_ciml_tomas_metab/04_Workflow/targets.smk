@@ -7,7 +7,7 @@ def core_targets():
     targets = [
         # Quality control (FastQC/MultiQC before and after Trimmomatic)
         f"{QCDIR}/raw_multiqc.html",
-        f"{QCDIR}/trimmed_multiqc.html",
+        *([] if SKIP_TRIMMING else [f"{QCDIR}/trimmed_multiqc.html"]),
         # QIIME 2 import and primer removal
         f"{IMPORTDIR}/{PROJ}-demux-paired-end.qzv",
         f"{IMPORTDIR}/{PROJ}-PE-demux-noprimer.qzv",
