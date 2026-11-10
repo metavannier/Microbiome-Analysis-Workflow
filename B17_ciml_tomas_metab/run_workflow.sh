@@ -54,8 +54,8 @@ PROJECT=$(awk '/^project:/ {p=1} p && $1 == "name:" {gsub("\"", "", $2); print $
 REPORTDIR=reports
 
 case "$SDM" in
-    conda) DEPLOY=(--sdm conda) ;;
-    apptainer) DEPLOY=(--sdm apptainer) ;;
+    conda) DEPLOY=(--sdm=conda) ;;
+    apptainer) DEPLOY=(--sdm=apptainer) ;;
     none)
         DEPLOY=()
         if [ -z "${SNAKEMAKE:-}" ]; then
@@ -231,7 +231,7 @@ case "$command" in
         ;;
     core)
         split_extra "$@"
-        snakemake_sel none --cores "$CORES" ${DEPLOY[@]+"${DEPLOY[@]}"} core
+        snakemake_sel none core --cores "$CORES" ${DEPLOY[@]+"${DEPLOY[@]}"}
         ;;
     run)
         [ "$#" -ge 1 ] || { echo "Usage: $0 run <comparison ID>" >&2; exit 1; }
