@@ -118,6 +118,9 @@ rule dada2_stats:
 
 
 # Error model learned by DADA2 (observed vs estimated error rates)
+# Error model learned by DADA2 (as dada2::plotErrors): observed error
+# frequencies (points), fitted model (gray line) and the error rate
+# expected from the quality scores (red line, --p-nominalq)
 rule dada2_error_model:
     input:
         f"{DADA2DIR}/{PROJ}-{GROUP}-base-transition-stats.qza",
@@ -138,5 +141,6 @@ rule dada2_error_model:
         """
         qiime dada2 plot-base-transitions \
             --i-base-transition-stats {input} \
+            --p-nominalq \
             --o-visualization {output} > {log} 2>&1
         """

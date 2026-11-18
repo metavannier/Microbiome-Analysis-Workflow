@@ -1,2 +1,2 @@
-Error model learned by DADA2: observed and estimated error rates of each base transition as a function of the quality score.
+Error model learned by DADA2, one panel per base transition (A2C = A read as C, ...; forward and reverse reads): observed error frequencies (points), error model fitted by DADA2 (gray line) and error rate expected from the quality scores (red line), as a function of the quality score. Expected: the gray line follows the points and the error frequencies decrease as the quality increases.
 Download, drag and drop the file on `QIIME 2 View <https://view.qiime2.org/>`_
